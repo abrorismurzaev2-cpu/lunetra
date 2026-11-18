@@ -2,15 +2,11 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'android/**'
-      - '.github/workflows/build-apk.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 
@@ -19,51 +15,46 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Install Android SDK commandline tools
+        run: |
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd /tmp
+          curl -fsSL -o cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q cmdtools.zip
+          mv cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build signed APK
+      - name: Build Release APK
         working-directory: android
         run: |
-          # Install gradle wrapper if needed
-          gradle wrapper --gradle-version 8.2 || true
-          chmod +x gradlew 2>/dev/null || true
-          
-          if [ -f gradlew ]; then
-            ./gradlew assembleRelease --no-daemon
-          else
-            gradle assembleRelease --no-daemon
-          fi
-          
-          echo "=== APK files ==="
+          export ANDROID_HOME=$HOME/android-sdk
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
           find . -name "*.apk" -type f -ls
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Lunetra-APK
-          path: |
-            android/app/build/outputs/apk/**/*.apk
-            android/**/*.apk
+          path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
-      - name: Create Release
+      - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.2.0-android
           name: Lunetra APK v1.2.0
           body: |
-            ## Lunetra Android APK
-            - Package ID: `app.lunetra.finance`
-            - Version: 1.2.0
-            - WebView app → https://abrorismurzaev2-cpu.github.io/lunetra/
+            ## Lunetra Android APK v1.2.0
+            Package: `app.lunetra.finance`
             
-            Скачайте APK из Assets ниже и установите на телефон.
-            Для RuStore загрузите этот же файл.
-          files: android/app/build/outputs/apk/**/*.apk
-          fail_on_unmatched_files: false
+            Скачайте **app-release.apk** из Assets.
+          files: android/app/build/outputs/apk/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
