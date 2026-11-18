@@ -1,4 +1,4 @@
-const CACHE = 'lunetra-v13';
+const CACHE = 'lunetra-v14';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.json', './icon.svg', './privacy.html'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
