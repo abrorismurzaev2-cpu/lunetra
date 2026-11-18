@@ -632,9 +632,9 @@ body.modal-open .floating-nav {
 
   <main class="view" id="view-profile">
     <div class="profile-header">
-      <div class="profile-avatar-large" onclick="document.getElementById('avatarUpload').click()">
+      <div class="profile-avatar-large" id="avatarTapArea" role="button" aria-label="Сменить фото">
         <div class="avatar-inner">
-          <img id="profileAvatarImg" style="display:none;" alt="">
+          <img id="profileAvatarImg" style="display:none;" alt="Аватар">
           <div class="icon" id="profileAvatarIcon" style="width:38px;height:38px;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
         </div>
         <div class="avatar-edit-badge">
@@ -644,8 +644,11 @@ body.modal-open .floating-nav {
       <h2 class="profile-name" id="profileName">Гость</h2>
       <div class="profile-id" id="profileId">Локальный профиль</div>
       <div id="streakWrap" style="margin-top:10px;"></div>
-      <input type="file" id="avatarUpload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
-      <button style="margin:12px auto 0;background:var(--bg-light);border:none;padding:9px 18px;border-radius:var(--radius-pill);font-weight:600;font-size:13px;cursor:pointer;color:var(--text-main);" onclick="editName()">Изменить имя</button>
+      <input type="file" id="avatarUpload" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;z-index:-1;" onchange="handleAvatarUpload(event)">
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+        <button type="button" style="background:var(--blue);color:#fff;border:none;padding:9px 16px;border-radius:var(--radius-pill);font-weight:600;font-size:13px;cursor:pointer;" onclick="pickAvatarPhoto()">Сменить фото</button>
+        <button type="button" style="background:var(--bg-light);border:none;padding:9px 16px;border-radius:var(--radius-pill);font-weight:600;font-size:13px;cursor:pointer;color:var(--text-main);" onclick="editName()">Изменить имя</button>
+      </div>
     </div>
     <div class="settings-row">
       <span style="font-weight:600;font-size:14px;">Валюта</span>
@@ -813,6 +816,10 @@ let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState;
   if (state[k] === undefined) state[k] = defaultState[k];
 });
 if (state.currentWallet === undefined) state.currentWallet = 0;
+if (!state.user || typeof state.user !== 'object') state.user = Object.assign({}, defaultState.user);
+if (state.user.name == null) state.user.name = defaultState.user.name;
+if (state.user.id == null) state.user.id = defaultState.user.id;
+if (state.user.avatar === undefined) state.user.avatar = null;
 
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
@@ -1386,34 +1393,97 @@ async function addToGoal(id) {
 }
 
 function updateAvatarUI() {
-  const img = document.getElementById('headerAvatarImg'), icon = document.getElementById('headerAvatarIcon');
-  const pImg = document.getElementById('profileAvatarImg'), pIcon = document.getElementById('profileAvatarIcon');
-  if (state.user.avatar) {
-    img.src = state.user.avatar; img.style.display = 'block'; pImg.src = state.user.avatar; pImg.style.display = 'block';
-    icon.style.display = 'none'; pIcon.style.display = 'none';
-  } else {
-    img.style.display = 'none'; pImg.style.display = 'none'; icon.style.display = 'flex'; pIcon.style.display = 'flex';
-  }
-  document.getElementById('profileName').textContent = state.user.name;
-  document.getElementById('profileId').textContent = state.user.id !== 'local' ? `TG ID: ${state.user.id}` : 'Локальный профиль';
+  try {
+    if (!state.user) state.user = { name: 'Гость', avatar: null, id: 'local' };
+    const img = document.getElementById('headerAvatarImg');
+    const icon = document.getElementById('headerAvatarIcon');
+    const pImg = document.getElementById('profileAvatarImg');
+    const pIcon = document.getElementById('profileAvatarIcon');
+    const has = !!(state.user.avatar);
+    if (img) {
+      if (has) { img.src = state.user.avatar; img.style.display = 'block'; }
+      else { img.removeAttribute('src'); img.style.display = 'none'; }
+    }
+    if (pImg) {
+      if (has) { pImg.src = state.user.avatar; pImg.style.display = 'block'; }
+      else { pImg.removeAttribute('src'); pImg.style.display = 'none'; }
+    }
+    if (icon) icon.style.display = has ? 'none' : 'flex';
+    if (pIcon) pIcon.style.display = has ? 'none' : 'flex';
+    const pn = document.getElementById('profileName');
+    const pi = document.getElementById('profileId');
+    if (pn) pn.textContent = state.user.name || 'Гость';
+    if (pi) pi.textContent = state.user.id && state.user.id !== 'local' ? ('TG ID: ' + state.user.id) : 'Локальный профиль';
+  } catch (e) { console.warn('updateAvatarUI', e); }
 }
+function pickAvatarPhoto() {
+  const input = document.getElementById('avatarUpload');
+  if (!input) { toast('Поле выбора фото недоступно'); return; }
+  try { input.click(); } catch (e) { toast('Не удалось открыть галерею'); }
+}
+(function wireAvatarTap() {
+  function bind() {
+    const area = document.getElementById('avatarTapArea');
+    if (!area || area.dataset.wired) return;
+    area.dataset.wired = '1';
+    area.addEventListener('click', function (e) {
+      e.preventDefault();
+      pickAvatarPhoto();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+  else bind();
+})();
 function handleAvatarUpload(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let w = img.width, h = img.height;
-      if (w > h) { if (w > 256) { h *= 256 / w; w = 256; } } else { if (h > 256) { w *= 256 / h; h = 256; } }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      state.user.avatar = canvas.toDataURL('image/jpeg', .85);
-      saveState(); updateAvatarUI(); toast('Аватар обновлён');
+  try {
+    const input = event.target;
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (!file.type || !file.type.startsWith('image/')) {
+      toast('Выберите изображение');
+      return;
+    }
+    if (!state.user) state.user = { name: 'Гость', avatar: null, id: 'local' };
+    const reader = new FileReader();
+    reader.onerror = function () { toast('Не удалось прочитать файл'); };
+    reader.onload = function (e) {
+      const img = new Image();
+      img.onerror = function () { toast('Не удалось загрузить фото'); };
+      img.onload = function () {
+        try {
+          const maxSide = 192;
+          let w = img.width, h = img.height;
+          if (w > maxSide || h > maxSide) {
+            if (w > h) { h = Math.round(h * maxSide / w); w = maxSide; }
+            else { w = Math.round(w * maxSide / h); h = maxSide; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          let dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+          if (dataUrl.length > 180000) dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+          state.user.avatar = dataUrl;
+          try { saveState(); } catch (err) {
+            state.user.avatar = canvas.toDataURL('image/jpeg', 0.4);
+            try { saveState(); } catch (e2) { toast('Не хватает места для фото'); return; }
+          }
+          updateAvatarUI();
+          toast('Аватар обновлён');
+          haptic('success');
+        } catch (err) {
+          console.warn(err);
+          toast('Ошибка обработки фото');
+        }
+      };
+      img.src = e.target.result;
     };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
+    input.value = '';
+  } catch (err) {
+    console.warn(err);
+    toast('Ошибка выбора фото');
+  }
 }
 async function editName() {
   const newName = await nativePrompt('Ваше имя', state.user.name, {
