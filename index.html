@@ -771,6 +771,7 @@ function haptic(type = 'light') {
 
 function toast(msg, ms = 2400) {
   const el = document.getElementById('toast');
+  if (!el) { console.log(msg); return; }
   el.textContent = msg; el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), ms);
 }
@@ -791,8 +792,14 @@ function confetti() {
 
 /* Subscribe once */
 function checkSubscribe() {
-  if (localStorage.getItem(SUB_KEY) === '1') return;
-  setTimeout(() => document.getElementById('subscribeModal').classList.add('active'), 400);
+  try {
+    if (localStorage.getItem(SUB_KEY) === '1') return;
+    setTimeout(function () {
+      if (localStorage.getItem(SUB_KEY) === '1') return;
+      var modal = document.getElementById('subscribeModal');
+      if (modal) modal.classList.add('active');
+    }, 500);
+  } catch (e) {}
 }
 
 function openExternal(url) {
@@ -858,7 +865,7 @@ const CATEGORIES = [
   { id: 'investment', name: 'Инвестиции', color: '#0A84FF' }, { id: 'other', name: 'Другое', color: '#8E8E93' },
   { id: 'income', name: 'Доход', color: '#30D158' }
 ];
-const getCat = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES.find(c => c.id === 'other');
+const getCat = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES.find(c => c.id === 'other') || { id: id, name: 'Другое', color: '#8E8E93' };
 
 function switchView(viewName) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1106,7 +1113,9 @@ function initCharts() {
   state.transactions.filter(t => t.type === 'expense').forEach(t => { catSums[t.category] = (catSums[t.category] || 0) + t.amount; });
   const entries = Object.entries(catSums).sort((a, b) => b[1] - a[1]);
   if (categoryChartInstance) categoryChartInstance.destroy();
-  categoryChartInstance = new Chart(document.getElementById('categoryChart').getContext('2d'), {
+  const catCanvas = document.getElementById('categoryChart');
+  if (!catCanvas) return;
+  categoryChartInstance = new Chart(catCanvas.getContext('2d'), {
     type: 'doughnut',
     data: { labels: entries.length ? entries.map(e => getCat(e[0]).name) : ['Нет данных'], datasets: [{ data: entries.length ? entries.map(e => e[1]) : [1], backgroundColor: entries.length ? entries.map(e => getCat(e[0]).color) : ['#E5E5EA'], borderWidth: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, cutout: '72%', animation: { animateScale: true }, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { size: 11 } } } } }
@@ -1165,7 +1174,7 @@ function updateSliders(changed) {
   document.getElementById('sliderSavings').style.setProperty('--val', s + '%');
   calculateRule();
 }
-document.getElementById('calcInput').addEventListener('input', calculateRule);
+try { document.getElementById('calcInput') && document.getElementById('calcInput').addEventListener('input', calculateRule); } catch(e) {}
 function calculateRule() {
   const val = parseFloat(document.getElementById('calcInput').value.replace(/\s/g, '').replace(',', '.')) || 0;
   const nPct = +document.getElementById('sliderNeeds').value, wPct = +document.getElementById('sliderWants').value, sPct = +document.getElementById('sliderSavings').value;
@@ -1192,11 +1201,17 @@ function renderGoals() {
   }).join('');
 }
 function openGoalModal() {
-  document.getElementById('goalName').value = ''; document.getElementById('goalTarget').value = ''; document.getElementById('goalCurrent').value = '';
-  document.getElementById('goalOverlay').classList.add('active'); document.getElementById('goalSheet').classList.add('active');
+  document.getElementById('goalName').value = '';
+  document.getElementById('goalTarget').value = '';
+  document.getElementById('goalCurrent').value = '';
+  document.body.classList.add('modal-open');
+  document.getElementById('goalOverlay').classList.add('active');
+  document.getElementById('goalSheet').classList.add('active');
 }
 function closeGoalModal() {
-  document.getElementById('goalOverlay').classList.remove('active'); document.getElementById('goalSheet').classList.remove('active');
+  document.body.classList.remove('modal-open');
+  document.getElementById('goalOverlay').classList.remove('active');
+  document.getElementById('goalSheet').classList.remove('active');
 }
 function submitGoal() {
   const name = document.getElementById('goalName').value.trim();
@@ -1259,15 +1274,20 @@ function closeNativeDialog(result) {
   var r = _dialogResolve; _dialogResolve = null;
   if (r) r(result);
 }
-document.getElementById('dialogCancel').onclick = function(){ closeNativeDialog(null); };
-document.getElementById('dialogOk').onclick = function(){
-  var input = document.getElementById('dialogInput');
-  var visible = input.style.display !== 'none';
-  closeNativeDialog(visible ? input.value : true);
-};
-document.getElementById('nativeDialog').addEventListener('click', function(e){
-  if (e.target.id === 'nativeDialog') closeNativeDialog(null);
-});
+(function setupNativeDialog(){
+  var cancel = document.getElementById('dialogCancel');
+  var ok = document.getElementById('dialogOk');
+  var ov = document.getElementById('nativeDialog');
+  if (cancel) cancel.onclick = function(){ closeNativeDialog(null); };
+  if (ok) ok.onclick = function(){
+    var input = document.getElementById('dialogInput');
+    var visible = input && input.style.display !== 'none';
+    closeNativeDialog(visible ? input.value : true);
+  };
+  if (ov) ov.addEventListener('click', function(e){
+    if (e.target.id === 'nativeDialog') closeNativeDialog(null);
+  });
+})();
 function nativePrompt(title, def, opts) {
   opts = opts || {};
   return showNativeDialog({
@@ -1465,16 +1485,22 @@ function exportCSV() {
 async function importData(event) {
   const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const data = JSON.parse(e.target.result);
       if (data.transactions && Array.isArray(data.transactions)) {
-        if (await nativeConfirm('Импорт данных', 'Текущие данные будут заменены', true)) {
-          state = { ...defaultState, ...data }; saveState(); renderHome(); applyTheme();
+        const ok = await nativeConfirm('Импорт данных', 'Текущие данные будут заменены', true);
+        if (ok) {
+          state = Object.assign({}, defaultState, data);
+          if (!Array.isArray(state.transactions)) state.transactions = [];
+          if (!Array.isArray(state.goals)) state.goals = [];
+          if (!Array.isArray(state.wallets)) state.wallets = defaultState.wallets.slice();
+          saveState(); renderHome(); applyTheme();
+          try { updateAvatarUI(); } catch (e) {}
           toast('Данные импортированы'); haptic('success');
         }
       } else toast('Неверный формат');
-    } catch { toast('Ошибка чтения'); }
+    } catch (err) { toast('Ошибка чтения'); }
   };
   reader.readAsText(file); event.target.value = '';
 }
@@ -1489,10 +1515,17 @@ if ('serviceWorker' in navigator) {
 }
 
 /* Boot */
-checkSubscribe();
-applyTheme();
-renderHome();
-updateSliders('needs');
+function bootApp() {
+  try { checkSubscribe(); } catch (e) { console.warn('sub', e); }
+  try { applyTheme(); } catch (e) { console.warn('theme', e); }
+  try { updateAvatarUI(); } catch (e) { console.warn('avatar', e); }
+  try { renderHome(); } catch (e) { console.warn('home', e); }
+  try {
+    if (document.getElementById('sliderNeeds')) updateSliders('needs');
+  } catch (e) { console.warn('calc', e); }
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootApp);
+else bootApp();
 </script>
 </body>
 </html>
