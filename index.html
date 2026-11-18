@@ -35,7 +35,7 @@
 body {
   background: var(--bg-light); color: var(--text-main); font-family: var(--font);
   min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased;
-  padding-bottom: 120px; transition: background .4s ease, color .4s ease;
+  padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); transition: background .4s ease, color .4s ease;
 }
 
 /* Animations */
@@ -220,10 +220,25 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
 }
 
 .floating-nav {
-  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-  background: var(--dark-bg); padding: 7px; border-radius: var(--radius-pill);
-  display: flex; gap: 3px; box-shadow: var(--shadow-float); z-index: 100;
-  border: 1px solid rgba(255,255,255,.1); animation: slideUpFade .6s .2s both;
+  position: fixed;
+  bottom: max(18px, calc(12px + env(safe-area-inset-bottom, 0px)));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark-bg);
+  padding: 7px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  gap: 3px;
+  box-shadow: var(--shadow-float);
+  z-index: 1000;
+  border: 1px solid rgba(255,255,255,.1);
+  max-width: calc(100vw - 24px);
+  animation: navSlideIn .55s .15s both;
+  will-change: transform, opacity;
+}
+@keyframes navSlideIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(28px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 .nav-btn {
   background: none; border: none; color: var(--text-light-muted); width: 52px; height: 52px;
@@ -573,7 +588,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
         <div class="item-icon" style="background:#FFF0F0;color:#FF453A;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div></div>
         <div class="item-info"><div class="item-name">Очистить историю</div><div class="item-desc">Удалить все транзакции</div></div>
       </div>
-      <div class="item-card" onclick="window.open('https://t.me/lunetra0','_blank')">
+      <div class="item-card" onclick="openExternal('https://t.me/lunetra0')">
         <div class="item-icon" style="background:#E8F4FD;color:#2AABEE;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9 22 2z"/></svg></div></div>
         <div class="item-info"><div class="item-name">Telegram-канал</div><div class="item-desc">@lunetra0</div></div>
       </div>
@@ -689,8 +704,38 @@ function checkSubscribe() {
   if (localStorage.getItem(SUB_KEY) === '1') return;
   setTimeout(() => document.getElementById('subscribeModal').classList.add('active'), 400);
 }
+
+function openExternal(url) {
+  try {
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openLink) {
+      Telegram.WebApp.openLink(url, { try_instant_view: false });
+      return;
+    }
+  } catch(e) {}
+  const a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
 function doSubscribe() {
-  window.open('https://t.me/lunetra0', '_blank');
+  const url = 'https://t.me/lunetra0';
+  try {
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink) {
+      Telegram.WebApp.openTelegramLink(url);
+    } else if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openLink) {
+      Telegram.WebApp.openLink(url, { try_instant_view: false });
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  } catch (e) {
+    location.href = url;
+  }
   localStorage.setItem(SUB_KEY, '1');
   document.getElementById('subscribeModal').classList.remove('active');
   haptic('success');
