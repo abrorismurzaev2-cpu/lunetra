@@ -1,0 +1,44 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'app.lunetra.finance'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "app.lunetra.finance"
+        minSdk 24
+        targetSdk 34
+        versionCode 12
+        versionName "1.2.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../lunetra.keystore')
+            storePassword 'lunetra123'
+            keyAlias 'lunetra'
+            keyPassword 'lunetra123'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+}

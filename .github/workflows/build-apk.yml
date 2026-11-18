@@ -2,11 +2,15 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/build-apk.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -15,148 +19,51 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Install bubblewrap
-        run: npm i -g @bubblewrap/cli
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Configure bubblewrap (non-interactive)
+      - name: Build signed APK
+        working-directory: android
         run: |
-          echo "JAVA_HOME=$JAVA_HOME"
-          ls "$JAVA_HOME" | head
-          mkdir -p "$HOME/.bubblewrap"
-          # Let bubblewrap manage SDK; point JDK to setup-java
-          cat > "$HOME/.bubblewrap/config.json" << EOF
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$HOME/android-sdk"
-          }
-          EOF
-          cat "$HOME/.bubblewrap/config.json"
+          # Install gradle wrapper if needed
+          gradle wrapper --gradle-version 8.2 || true
+          chmod +x gradlew 2>/dev/null || true
           
-          # Pre-accept licenses
-          mkdir -p "$HOME/android-sdk/licenses"
-          printf '\n24333f8a63b6825ea9c5514fbe7619360cde910babc0042aef66f5b304e65a9f\n' > "$HOME/android-sdk/licenses/android-sdk-license"
-          printf '\n84831b9409646161bbf9b4254b7b14cef9caf5d1\n' > "$HOME/android-sdk/licenses/android-sdk-preview-license"
-          printf '\nd56f5187479451eabf01fb78af6dfcb131a6481e\n' > "$HOME/android-sdk/licenses/android-sdk-arm-dbt-license"
-
-      - name: Init TWA
-        run: |
-          mkdir -p twa && cd twa
-          keytool -genkeypair -keystore android.keystore -alias lunetra \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass lunetra123 -keypass lunetra123 \
-            -dname "CN=Lunetra,O=Lunetra,C=RU" -noprompt
-
-          # Answer prompts: use existing JDK (n), path already in config, package id etc.
-          # bubblewrap init still asks many questions - feed defaults
-          set +e
-          {
-            echo "n"                    # don't install JDK (use existing)
-            echo "$JAVA_HOME"           # jdk path if asked
-            echo "Y"                    # install android sdk if asked
-            echo "app.lunetra.finance"  # package id
-            echo "Lunetra"              # name
-            echo "Lunetra"              # launcher
-            echo ""                     # start url default
-            echo "" 
-            echo ""
-            echo "Y"                    # generate signing key? or use existing
-            echo "./android.keystore"
-            echo "lunetra"
-            echo "lunetra123"
-            echo "lunetra123"
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-            echo ""
-          } | timeout 900 bubblewrap init --manifest=https://abrorismurzaev2-cpu.github.io/lunetra/manifest.json 2>&1 | tee init.log
-          set -e
-          echo "=== after init ==="
-          ls -la
-          test -f twa-manifest.json && echo "has manifest" || echo "NO manifest"
-          test -f gradlew && echo "has gradle" || echo "NO gradle"
-
-      - name: Build APK
-        run: |
-          cd twa
-          if [ ! -f gradlew ] && [ ! -f twa-manifest.json ]; then
-            echo "Init failed completely"
-            cat init.log | tail -100
-            exit 1
+          if [ -f gradlew ]; then
+            ./gradlew assembleRelease --no-daemon
+          else
+            gradle assembleRelease --no-daemon
           fi
           
-          # Patch signing
-          if [ -f twa-manifest.json ]; then
-            python3 -c "
-          import json
-          from pathlib import Path
-          p=Path('twa-manifest.json')
-          m=json.loads(p.read_text())
-          m['signingKey']={'path':'./android.keystore','alias':'lunetra'}
-          p.write_text(json.dumps(m,indent=2))
-          "
-          fi
-          
-          set +e
-          {
-            echo "lunetra123"
-            echo "lunetra123"
-            echo "n"
-            echo "$JAVA_HOME"
-            echo "Y"
-          } | timeout 1200 bubblewrap build --skipPwaValidation 2>&1 | tee build.log
-          set -e
-          
-          find . -name '*.apk' -type f -ls
-          
-          if ! find . -name '*.apk' | grep -q .; then
-            if [ -f gradlew ]; then
-              chmod +x gradlew
-              ./gradlew assembleRelease \
-                -Pandroid.injected.signing.store.file=$PWD/android.keystore \
-                -Pandroid.injected.signing.store.password=lunetra123 \
-                -Pandroid.injected.signing.key.alias=lunetra \
-                -Pandroid.injected.signing.key.password=lunetra123
-              find . -name '*.apk' -type f -ls
-            fi
-          fi
-          
-          find . -name '*.apk' -type f | grep -q . || (echo FAIL; tail -100 build.log; exit 1)
+          echo "=== APK files ==="
+          find . -name "*.apk" -type f -ls
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Lunetra-APK
-          path: twa/**/*.apk
+          path: |
+            android/app/build/outputs/apk/**/*.apk
+            android/**/*.apk
           if-no-files-found: error
 
-      - name: Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.2.0-android
-          name: Lunetra Android APK v1.2.0
-          body: "APK package app.lunetra.finance for RuStore"
-          files: twa/**/*.apk
+          name: Lunetra APK v1.2.0
+          body: |
+            ## Lunetra Android APK
+            - Package ID: `app.lunetra.finance`
+            - Version: 1.2.0
+            - WebView app → https://abrorismurzaev2-cpu.github.io/lunetra/
+            
+            Скачайте APK из Assets ниже и установите на телефон.
+            Для RuStore загрузите этот же файл.
+          files: android/app/build/outputs/apk/**/*.apk
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
