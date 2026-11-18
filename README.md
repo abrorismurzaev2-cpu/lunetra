@@ -1,54 +1,44 @@
 # Lunetra
 
 **Lunetra** — современный приватный трекер личных финансов.  
-Красивый интерфейс в духе iOS / Telegram Mini Apps. Все данные хранятся только локально.
+Все данные только на вашем устройстве.
 
 🌐 **Приложение:** https://abrorismurzaev2-cpu.github.io/lunetra/  
 🏠 **Лендинг:** https://abrorismurzaev2-cpu.github.io/lunetra-landing/  
 📢 **Telegram:** https://t.me/lunetra0  
-📦 **Репозиторий:** https://github.com/abrorismurzaev2-cpu/lunetra  
-🔒 **Политика:** [privacy.html](privacy.html)
 
 ---
 
-## Важно: обновить index.html до v1.2
+## APK для RuStore (через PWABuilder)
 
-В папке проекта (`artifacts/lunetra/index.html`) лежит полная версия **v1.2** с:
-- пустым стартом (без демо-данных)
-- попапом подписки на @lunetra0 (один раз)
-- новыми анимациями и ~34 доп. функциями
-
-**Загрузите этот файл в репозиторий вручную:**
-1. Откройте https://github.com/abrorismurzaev2-cpu/lunetra
-2. `index.html` → Edit или **Add file → Upload files**
-3. Замените содержимым из `artifacts/lunetra/index.html`
-4. Commit
-
-После этого обновите GitHub Pages и пересоберите APK.
-
----
-
-## Как сделать APK (PWABuilder → RuStore)
-
-1. **GitHub Pages:** Settings → Pages → branch `main` → root → Save  
-2. **PWABuilder:** https://www.pwabuilder.com/ → URL приложения → Android → Generate  
-3. **RuStore:** загрузите APK, укажите политику `.../privacy.html`, категория «Финансы»
-
-Package ID пример: `app.lunetra.finance`
+1. Открой **https://www.pwabuilder.com/**
+2. Вставь URL: `https://abrorismurzaev2-cpu.github.io/lunetra/`
+3. **Start** → дождись анализа
+4. **Package for stores** → **Android**
+5. Настройки:
+   - Package ID: `app.lunetra.finance`
+   - App name: `Lunetra`
+   - Host: `abrorismurzaev2-cpu.github.io`
+   - Start URL: `/lunetra/`
+   - Display: `standalone`
+   - Theme color: `#0B0B0E`
+6. **Generate** → скачай **APK** (или AAB)
+7. Загрузи в [RuStore Console](https://console.rustore.ru/)
+8. Политика: `https://abrorismurzaev2-cpu.github.io/lunetra/privacy.html`
 
 ---
 
-## Возможности v1.2
-- Пустой старт, попап подписки (один раз)
-- Доходы / расходы, заметки, дата, быстрые суммы
-- 13 категорий, фильтры, поиск, свайп-удаление, Undo
-- Бюджет, цели, streak, аналитика, 50/30/20
-- Тёмная тема, скрытие баланса, компактный список
-- Экспорт JSON/CSV, импорт, 6 валют
-- Confetti, анимации, haptic, PWA
+## v1.2
+
+- Пустой старт (без демо-данных)
+- Попап подписки на @lunetra0 (один раз)
+- Скрытие баланса, быстрые суммы, Undo
+- Streak, confetti, больше анимаций
+- Цели, бюджет, аналитика, 50/30/20
+- Экспорт JSON/CSV, тёмная тема
 
 ---
 
-## Лендинг
-Отдельный репозиторий: [lunetra-landing](https://github.com/abrorismurzaev2-cpu/lunetra-landing)  
-Включите Pages там же → будет маркетинговая страница.
+## Приватность
+
+Нет серверов, нет аналитики, нет рекламы. Только localStorage.
