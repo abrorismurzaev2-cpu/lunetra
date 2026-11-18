@@ -198,14 +198,26 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
 
 .profile-header { text-align: center; padding: 16px 0 24px; }
 .profile-avatar-large {
-  width: 108px; height: 108px; border-radius: 50%; background: #E5E5EA; margin: 0 auto 14px;
-  display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
+  width: 108px; height: 108px; border-radius: 50%; background: #E5E5EA; margin: 0 auto 18px;
+  display: flex; align-items: center; justify-content: center; overflow: visible; position: relative;
   cursor: pointer; box-shadow: 0 10px 32px rgba(0,0,0,.12); transition: transform .3s var(--spring);
   color: var(--text-muted); animation: floatY 4s ease-in-out infinite;
+}
+.profile-avatar-large .avatar-inner {
+  width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; background: inherit;
 }
 [data-theme="dark"] .profile-avatar-large { background: #2C2C2E; }
 .profile-avatar-large:active { transform: scale(.92); animation: none; }
 .profile-avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-edit-badge {
+  position: absolute; bottom: -2px; right: -2px;
+  background: var(--blue); color: #fff; width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid var(--bg-light); box-shadow: 0 4px 12px rgba(10,132,255,.35); z-index: 5;
+}
+[data-theme="dark"] .avatar-edit-badge { border-color: var(--card-bg); }
+.avatar-edit-badge .icon { width: 16px; height: 16px; }
 .profile-name { font-size: 24px; font-weight: 700; margin-bottom: 3px; letter-spacing: -.4px; }
 .profile-id { font-size: 13px; color: var(--text-muted); font-weight: 500; }
 .settings-row {
@@ -230,11 +242,17 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
   display: flex;
   gap: 3px;
   box-shadow: var(--shadow-float);
-  z-index: 1000;
+  z-index: 90;
   border: 1px solid rgba(255,255,255,.1);
   max-width: calc(100vw - 24px);
   animation: navSlideIn .55s .15s both;
   will-change: transform, opacity;
+  transition: opacity .25s, transform .35s var(--spring);
+}
+body.modal-open .floating-nav {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(24px);
 }
 @keyframes navSlideIn {
   from { opacity: 0; transform: translateX(-50%) translateY(28px); }
@@ -253,14 +271,14 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px); opacity: 0; pointer-events: none;
-  transition: opacity .35s var(--ease-out); z-index: 200;
+  transition: opacity .35s var(--ease-out); z-index: 1200;
 }
 .modal-overlay.active { opacity: 1; pointer-events: all; }
 .bottom-sheet {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(110%);
   width: 100%; max-width: 520px; background: var(--card-bg);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  padding: 20px 18px calc(24px + env(safe-area-inset-bottom)); z-index: 201;
+  padding: 20px 18px calc(28px + env(safe-area-inset-bottom, 0px)); z-index: 1210;
   transition: transform .5s var(--spring); max-height: 92vh; overflow-y: auto;
 }
 .bottom-sheet.active { transform: translateX(-50%) translateY(0); }
@@ -389,6 +407,55 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
   animation: confettiFall 2.2s ease-in forwards; pointer-events: none;
 }
 
+
+.native-dialog-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px); z-index: 1300; opacity: 0; pointer-events: none;
+  transition: opacity .3s; display: flex; align-items: flex-end; justify-content: center;
+}
+.native-dialog-overlay.active { opacity: 1; pointer-events: all; }
+.native-dialog {
+  width: 100%; max-width: 520px; background: var(--card-bg);
+  border-radius: 20px 20px 0 0; padding: 22px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(100%); transition: transform .4s cubic-bezier(.32,.72,0,1);
+}
+.native-dialog-overlay.active .native-dialog { transform: translateY(0); }
+.native-dialog h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; letter-spacing: -.3px; }
+.native-dialog p { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.45; white-space: pre-line; }
+.native-dialog input {
+  width: 100%; padding: 14px 16px; border-radius: 14px; border: 2px solid transparent;
+  background: var(--bg-light); font-size: 20px; font-weight: 700; font-family: var(--font);
+  color: var(--text-main); outline: none; margin-bottom: 16px;
+}
+.native-dialog input:focus { border-color: var(--blue); }
+.native-dialog .dialog-actions { display: flex; gap: 10px; }
+.native-dialog .dialog-actions button {
+  flex: 1; padding: 14px; border-radius: 14px; border: none; font-size: 15px; font-weight: 600;
+  font-family: var(--font); cursor: pointer;
+}
+.btn-dialog-cancel { background: var(--bg-light); color: var(--text-main); }
+.btn-dialog-ok { background: var(--dark-bg); color: #fff; }
+.btn-dialog-danger { background: #FF3B30; color: #fff; }
+.quick-chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.quick-chip {
+  padding: 8px 14px; border-radius: 20px; border: none; background: var(--bg-light);
+  font-weight: 600; font-size: 13px; color: var(--text-main); cursor: pointer; font-family: var(--font);
+}
+.search-box {
+  background: var(--card-bg); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-card);
+}
+.search-box input {
+  border: none; background: none; outline: none; flex: 1; font-size: 15px; font-family: var(--font);
+  color: var(--text-main); font-weight: 500;
+}
+.template-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; scrollbar-width: none; }
+.template-chip {
+  flex-shrink: 0; padding: 10px 14px; border-radius: 14px; background: var(--card-bg);
+  box-shadow: var(--shadow-card); border: none; font-weight: 600; font-size: 12px;
+  color: var(--text-main); cursor: pointer; font-family: var(--font); white-space: nowrap;
+}
+
 </style>
 </head>
 <body>
@@ -451,6 +518,13 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
     <div class="search-bar">
       <div class="icon" style="color:var(--text-muted);"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       <input type="text" id="searchInput" placeholder="Поиск, категория, заметка..." oninput="renderTransactions()">
+    </div>
+    <div class="template-row">
+      <button type="button" class="template-chip" onclick="applyQuickTemplate(200,'food','expense','Кофе')">Кофе 200</button>
+      <button type="button" class="template-chip" onclick="applyQuickTemplate(500,'transport','expense','Такси')">Такси 500</button>
+      <button type="button" class="template-chip" onclick="applyQuickTemplate(1500,'food','expense','Продукты')">Продукты</button>
+      <button type="button" class="template-chip" onclick="duplicateLastTx()">Повторить</button>
+      <button type="button" class="template-chip" onclick="monthlyReport()">Отчёт</button>
     </div>
     <div class="chip-row" id="filterChips">
       <div class="chip active" data-filter="all" onclick="setFilter('all')">Все</div>
@@ -542,10 +616,12 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
   <main class="view" id="view-profile">
     <div class="profile-header">
       <div class="profile-avatar-large" onclick="document.getElementById('avatarUpload').click()">
-        <img id="profileAvatarImg" style="display:none;" alt="">
-        <div class="icon" id="profileAvatarIcon" style="width:38px;height:38px;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-        <div style="position:absolute;bottom:0;right:0;background:var(--blue);color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--bg-light);">
-          <div class="icon" style="width:13px;height:13px;"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <div class="avatar-inner">
+          <img id="profileAvatarImg" style="display:none;" alt="">
+          <div class="icon" id="profileAvatarIcon" style="width:38px;height:38px;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        </div>
+        <div class="avatar-edit-badge">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
         </div>
       </div>
       <h2 class="profile-name" id="profileName">Гость</h2>
@@ -597,6 +673,20 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
       Lunetra v1.2 · Приватный трекер<br>Данные только на вашем устройстве
     </div>
   </main>
+</div>
+
+
+<div class="native-dialog-overlay" id="nativeDialog">
+  <div class="native-dialog">
+    <h3 id="dialogTitle">Ввод</h3>
+    <p id="dialogDesc" style="display:none;"></p>
+    <div class="quick-chip-row" id="dialogChips" style="display:none;"></div>
+    <input type="text" id="dialogInput" inputmode="decimal" placeholder="" style="display:none;">
+    <div class="dialog-actions">
+      <button type="button" class="btn-dialog-cancel" id="dialogCancel">Отмена</button>
+      <button type="button" class="btn-dialog-ok" id="dialogOk">Готово</button>
+    </div>
+  </div>
 </div>
 
 <nav class="floating-nav">
@@ -944,9 +1034,9 @@ function toggleSwipe(el) {
   if (!isSwiped) { el.classList.add('swiped'); haptic('medium'); }
 }
 
-function deleteTransaction(id, event) {
+async function deleteTransaction(id, event) {
   event.stopPropagation();
-  if (!confirm('Удалить эту операцию?')) return;
+  if (!(await nativeConfirm('Удалить операцию?', 'Можно будет отменить через «Отмена»', true))) return;
   const tx = state.transactions.find(t => t.id === id);
   if (tx) state.lastDeleted = { ...tx };
   state.transactions = state.transactions.filter(t => t.id !== id);
@@ -1037,12 +1127,22 @@ function updateCurrencyUI() {
   ['calcCurrency','modalCurrency','goalCurrency'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = state.currency; });
   document.getElementById('currencySelect').value = state.currency;
 }
-function setBudget() {
-  const val = prompt('Месячный лимит расходов:', state.budget || '');
-  if (val !== null) {
-    const num = parseFloat(val.replace(/\s/g, '').replace(',', '.'));
-    if (!isNaN(num) && num >= 0) { state.budget = num; saveState(); renderHome(); toast('Бюджет обновлён'); }
-  }
+async function setBudget() {
+  const val = await nativePrompt('Месячный бюджет', state.budget || '', {
+    placeholder: 'Лимит расходов',
+    inputMode: 'decimal',
+    chips: [
+      { l: '10 000', v: '10000' },
+      { l: '30 000', v: '30000' },
+      { l: '50 000', v: '50000' },
+      { l: '100 000', v: '100000' }
+    ],
+    okText: 'Сохранить'
+  });
+  if (val === null) return;
+  const num = parseFloat(String(val).replace(/\s/g, '').replace(',', '.'));
+  if (isNaN(num) || num < 0) { toast('Некорректное значение'); return; }
+  state.budget = num; saveState(); renderHome(); toast('Бюджет обновлён');
 }
 
 function setRule(rule) {
@@ -1107,19 +1207,103 @@ function submitGoal() {
   state.goals.push({ id: 'g' + Date.now(), name, target, current, color: colors[state.goals.length % colors.length] });
   saveState(); closeGoalModal(); renderGoals(); haptic('success'); toast('Цель создана'); confetti();
 }
-function deleteGoal(id) {
-  if (confirm('Удалить цель?')) { state.goals = state.goals.filter(g => g.id !== id); saveState(); renderGoals(); toast('Цель удалена'); }
+async function deleteGoal(id) {
+  if (await nativeConfirm('Удалить цель?', 'Прогресс по цели будет потерян', true)) { state.goals = state.goals.filter(g => g.id !== id); saveState(); renderGoals(); toast('Цель удалена'); }
 }
-function addToGoal(id) {
-  const val = prompt('Сколько добавить?');
-  if (val === null) return;
-  const num = parseFloat(val.replace(/\s/g, '').replace(',', '.'));
-  if (isNaN(num) || num <= 0) return;
-  const g = state.goals.find(x => x.id === id);
-  if (g) {
-    g.current += num; saveState(); renderGoals(); haptic('success'); toast('Пополнено');
-    if (g.current >= g.target) confetti();
+
+let _dialogResolve = null;
+function showNativeDialog(opts) {
+  return new Promise(function(resolve) {
+    _dialogResolve = resolve;
+    var ov = document.getElementById('nativeDialog');
+    document.getElementById('dialogTitle').textContent = opts.title || '';
+    var descEl = document.getElementById('dialogDesc');
+    if (opts.desc) { descEl.style.display = 'block'; descEl.textContent = opts.desc; }
+    else { descEl.style.display = 'none'; }
+    var input = document.getElementById('dialogInput');
+    var chipsEl = document.getElementById('dialogChips');
+    var showInput = opts.showInput !== false && (opts.placeholder !== undefined || opts.value !== undefined || opts.inputMode || opts.chips);
+    if (opts.showInput === false) showInput = false;
+    if (showInput) {
+      input.style.display = 'block';
+      input.value = opts.value != null ? String(opts.value) : '';
+      input.placeholder = opts.placeholder || '';
+      input.inputMode = opts.inputMode || 'text';
+      setTimeout(function(){ input.focus(); }, 280);
+    } else {
+      input.style.display = 'none';
+    }
+    if (opts.chips && opts.chips.length) {
+      chipsEl.style.display = 'flex';
+      chipsEl.innerHTML = opts.chips.map(function(c){
+        return '<button type="button" class="quick-chip" data-v="'+c.v+'">'+c.l+'</button>';
+      }).join('');
+      chipsEl.querySelectorAll('.quick-chip').forEach(function(btn){
+        btn.onclick = function(){ input.style.display='block'; input.value = btn.dataset.v; };
+      });
+    } else {
+      chipsEl.style.display = 'none'; chipsEl.innerHTML = '';
+    }
+    var ok = document.getElementById('dialogOk');
+    ok.textContent = opts.okText || 'Готово';
+    ok.className = opts.danger ? 'btn-dialog-danger' : 'btn-dialog-ok';
+    document.body.classList.add('modal-open');
+    ov.classList.add('active');
+  });
+}
+function closeNativeDialog(result) {
+  document.getElementById('nativeDialog').classList.remove('active');
+  if (!document.querySelector('.bottom-sheet.active') && !document.getElementById('subscribeModal')?.classList.contains('active')) {
+    document.body.classList.remove('modal-open');
   }
+  var r = _dialogResolve; _dialogResolve = null;
+  if (r) r(result);
+}
+document.getElementById('dialogCancel').onclick = function(){ closeNativeDialog(null); };
+document.getElementById('dialogOk').onclick = function(){
+  var input = document.getElementById('dialogInput');
+  var visible = input.style.display !== 'none';
+  closeNativeDialog(visible ? input.value : true);
+};
+document.getElementById('nativeDialog').addEventListener('click', function(e){
+  if (e.target.id === 'nativeDialog') closeNativeDialog(null);
+});
+function nativePrompt(title, def, opts) {
+  opts = opts || {};
+  return showNativeDialog({
+    title: title, value: def != null ? String(def) : '', placeholder: opts.placeholder || '',
+    inputMode: opts.inputMode || 'text', chips: opts.chips, okText: opts.okText || 'Сохранить', desc: opts.desc
+  });
+}
+function nativeConfirm(title, desc, danger) {
+  return showNativeDialog({ title: title, desc: desc, showInput: false, danger: danger, okText: danger ? 'Удалить' : 'Да' }).then(function(v){ return !!v; });
+}
+
+
+async function addToGoal(id) {
+  const g = state.goals.find(x => x.id === id);
+  if (!g) return;
+  const left = Math.max(0, (g.target || 0) - (g.current || 0));
+  const val = await nativePrompt('Пополнить цель', '', {
+    placeholder: 'Сумма',
+    inputMode: 'decimal',
+    desc: g.name + (left ? ' · осталось ' + fmt(left) : ''),
+    chips: [
+      { l: '500', v: '500' },
+      { l: '1 000', v: '1000' },
+      { l: '5 000', v: '5000' },
+      { l: 'Всё', v: String(left || 1000) }
+    ],
+    okText: 'Пополнить'
+  });
+  if (val == null || val === '') return;
+  const num = parseFloat(String(val).replace(/\s/g, '').replace(',', '.'));
+  if (!num || num <= 0) { toast('Некорректная сумма'); return; }
+  g.current = (g.current || 0) + num;
+  updateStreak();
+  saveState(); renderGoals(); renderHome(); haptic('success');
+  if (g.current >= g.target) { confetti(); toast('Цель достигнута!'); }
+  else toast('Пополнено: ' + fmt(num));
 }
 
 function updateAvatarUI() {
@@ -1152,23 +1336,66 @@ function handleAvatarUpload(event) {
   };
   reader.readAsDataURL(file);
 }
-function editName() {
-  const newName = prompt('Ваше имя:', state.user.name);
-  if (newName && newName.trim()) { state.user.name = newName.trim(); saveState(); updateAvatarUI(); toast('Имя изменено'); }
+async function editName() {
+  const newName = await nativePrompt('Ваше имя', state.user.name, {
+    placeholder: 'Имя', inputMode: 'text', okText: 'Сохранить'
+  });
+  if (newName && String(newName).trim()) {
+    state.user.name = String(newName).trim();
+    saveState(); updateAvatarUI(); toast('Имя изменено');
+  }
 }
 
 let currentType = 'expense', currentCat = 'food';
+
+function applyQuickTemplate(amount, cat, type, note) {
+  openAddModal(type || 'expense');
+  setTimeout(function() {
+    document.getElementById('amountInput').value = amount;
+    if (cat) selectCat(cat);
+    if (note) document.getElementById('noteInput').value = note;
+  }, 120);
+}
+function duplicateLastTx() {
+  var list = state.transactions.slice().sort(function(a,b){ return new Date(b.date) - new Date(a.date); });
+  if (!list.length) { toast('Нет операций'); return; }
+  var t = list[0];
+  state.transactions.push(Object.assign({}, t, { id: Date.now().toString(), date: new Date().toISOString() }));
+  updateStreak(); saveState(); renderHome(); toast('Повторена последняя операция'); haptic('success');
+}
+function monthlyReport() {
+  var now = new Date();
+  var list = state.transactions.filter(function(t) {
+    var d = new Date(t.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  var exp = list.filter(function(t){ return t.type === 'expense'; }).reduce(function(s,t){ return s + t.amount; }, 0);
+  var inc = list.filter(function(t){ return t.type === 'income'; }).reduce(function(s,t){ return s + t.amount; }, 0);
+  var byCat = {};
+  list.filter(function(t){ return t.type === 'expense'; }).forEach(function(t){ byCat[t.category] = (byCat[t.category] || 0) + t.amount; });
+  var top = Object.keys(byCat).map(function(k){ return [k, byCat[k]]; }).sort(function(a,b){ return b[1]-a[1]; })[0];
+  var topName = top ? ((CATEGORIES.find(function(c){ return c.id === top[0]; }) || {}).name || top[0]) : '—';
+  showNativeDialog({
+    title: 'Отчёт за месяц',
+    desc: 'Доходы: ' + fmt(inc) + '\nРасходы: ' + fmt(exp) + '\nБаланс: ' + fmt(inc - exp) + '\nТоп категория: ' + topName + (top ? ' (' + fmt(top[1]) + ')' : ''),
+    showInput: false,
+    okText: 'Закрыть'
+  });
+}
+
 function openAddModal(type) {
   currentType = type; setFormType(type);
   document.getElementById('amountInput').value = '';
   document.getElementById('noteInput').value = '';
   document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
+  document.body.classList.add('modal-open');
   document.getElementById('addOverlay').classList.add('active');
   document.getElementById('addSheet').classList.add('active');
   setTimeout(() => document.getElementById('amountInput').focus(), 280);
   haptic('light');
 }
 function closeAddModal() {
+  document.body.classList.remove('modal-open');
   document.getElementById('addOverlay').classList.remove('active');
   document.getElementById('addSheet').classList.remove('active');
   document.activeElement?.blur();
@@ -1235,14 +1462,14 @@ function exportCSV() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `lunetra-${new Date().toISOString().slice(0,10)}.csv`; a.click(); toast('CSV скачан');
 }
-function importData(event) {
+async function importData(event) {
   const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
       if (data.transactions && Array.isArray(data.transactions)) {
-        if (confirm('Заменить текущие данные импортом?')) {
+        if (await nativeConfirm('Импорт данных', 'Текущие данные будут заменены', true)) {
           state = { ...defaultState, ...data }; saveState(); renderHome(); applyTheme();
           toast('Данные импортированы'); haptic('success');
         }
@@ -1251,8 +1478,8 @@ function importData(event) {
   };
   reader.readAsText(file); event.target.value = '';
 }
-function clearHistory() {
-  if (confirm('Удалить все транзакции? Это нельзя отменить.')) {
+async function clearHistory() {
+  if (await nativeConfirm('Очистить историю?', 'Все операции будут удалены без восстановления', true)) {
     state.transactions = []; state.lastDeleted = null; saveState(); renderHome(); switchView('home'); toast('История очищена');
   }
 }
