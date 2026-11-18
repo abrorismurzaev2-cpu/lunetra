@@ -12,147 +12,140 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <link rel="apple-touch-icon" href="icon.svg" />
 <title>Lunetra</title>
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
 <style>
-/* LUNETRA Design Tokens */
+
 :root {
-  --bg-light: #F2F2F7;
-  --card-bg: #FFFFFF;
-  --dark-bg: #0F0F12;
-  --dark-surface: #1C1C1E;
-  --dark-elevated: #2C2C2E;
-  --text-main: #1D1D1F;
-  --text-muted: #8E8E93;
-  --text-light: #FFFFFF;
-  --text-light-muted: rgba(255, 255, 255, 0.62);
-  --green: #34C759;
-  --red: #FF3B30;
-  --blue: #0A84FF;
-  --orange: #FF9F0A;
-  --purple: #BF5AF2;
-  --teal: #64D2FF;
-  --pink: #FF375F;
-  --radius-xl: 36px;
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --radius-sm: 12px;
-  --radius-pill: 99px;
-  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
-  --shadow-float: 0 14px 40px rgba(0, 0, 0, 0.18);
+  --bg-light: #F2F2F7; --card-bg: #FFFFFF; --dark-bg: #0B0B0E; --dark-surface: #1A1A1E;
+  --text-main: #1D1D1F; --text-muted: #8E8E93; --text-light: #FFFFFF;
+  --text-light-muted: rgba(255,255,255,0.62);
+  --green: #30D158; --red: #FF453A; --blue: #0A84FF; --orange: #FF9F0A;
+  --purple: #BF5AF2; --teal: #64D2FF; --pink: #FF375F;
+  --radius-xl: 36px; --radius-lg: 24px; --radius-md: 16px; --radius-sm: 12px; --radius-pill: 99px;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1); --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.06); --shadow-float: 0 16px 48px rgba(0,0,0,0.22);
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
 }
 [data-theme="dark"] {
-  --bg-light: #000000;
-  --card-bg: #1C1C1E;
-  --text-main: #F5F5F7;
-  --text-muted: #98989F;
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --bg-light: #000; --card-bg: #1C1C1E; --text-main: #F5F5F7; --text-muted: #98989F;
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 body {
-  background: var(--bg-light);
-  color: var(--text-main);
-  font-family: var(--font);
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  padding-bottom: 120px;
-  transition: background 0.35s ease, color 0.35s ease;
+  background: var(--bg-light); color: var(--text-main); font-family: var(--font);
+  min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased;
+  padding-bottom: 120px; transition: background .4s ease, color .4s ease;
 }
-@keyframes slideUpFade { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Animations */
+@keyframes slideUpFade { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes scaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
-@keyframes slideInRight { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
-.view { display: none; animation: slideUpFade 0.42s var(--ease-out) forwards; }
-.view.active { display: block; }
+@keyframes scaleIn { from { opacity: 0; transform: scale(.88); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes bounceIn { 0% { opacity: 0; transform: scale(.6); } 60% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(10,132,255,.4); } 50% { box-shadow: 0 0 0 12px rgba(10,132,255,0); } }
+@keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes confettiFall { 0% { transform: translateY(-20px) rotate(0); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+@keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ripple { to { transform: scale(2.5); opacity: 0; } }
+
+.view { display: none; }
+.view.active { display: block; animation: slideUpFade .5s var(--ease-out) forwards; }
 .icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
 .icon svg { width: 100%; height: 100%; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+
 .top-card {
-  background: var(--dark-bg);
-  color: var(--text-light);
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  padding: 22px 20px 72px;
-  position: relative;
-  z-index: 10;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+  background: linear-gradient(165deg, #0B0B0E 0%, #15151A 100%);
+  color: var(--text-light); border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  padding: 22px 20px 76px; position: relative; z-index: 10;
+  box-shadow: 0 16px 56px rgba(0,0,0,.28);
 }
 .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .avatar-wrapper {
   width: 44px; height: 44px; border-radius: 50%; background: var(--dark-surface);
   display: flex; align-items: center; justify-content: center; overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.12); cursor: pointer; transition: transform 0.2s var(--spring);
+  border: 1px solid rgba(255,255,255,.12); cursor: pointer; transition: transform .25s var(--spring);
   color: var(--text-light-muted);
 }
-.avatar-wrapper:active { transform: scale(0.9); }
+.avatar-wrapper:active { transform: scale(.88); }
 .avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 .icon-btn {
-  width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.08);
+  width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.08);
   border: none; color: #fff; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: transform 0.2s var(--spring);
+  cursor: pointer; transition: transform .25s var(--spring), background .2s;
 }
-.icon-btn:active { transform: scale(0.85); }
+.icon-btn:active { transform: scale(.82); background: rgba(255,255,255,.15); }
 .wallet-selector {
   text-align: center; font-size: 13px; color: var(--text-light-muted);
-  margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 4px;
-  cursor: pointer;
+  margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer;
+  transition: opacity .2s;
 }
+.wallet-selector:active { opacity: .7; }
 .balance-amount {
-  font-size: 52px; font-weight: 700; letter-spacing: -2.2px; line-height: 1.05;
+  font-size: 52px; font-weight: 700; letter-spacing: -2.4px; line-height: 1.05;
   text-align: center; font-variant-numeric: tabular-nums;
+  animation: bounceIn .7s var(--spring) both;
 }
+.balance-hidden .balance-amount { filter: blur(12px); user-select: none; }
 .balance-sub { text-align: center; font-size: 13px; color: var(--text-light-muted); margin-bottom: 18px; }
 .action-floats {
-  position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
+  position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 10px; z-index: 20;
 }
 .action-pill {
-  background: var(--dark-surface); color: #fff; border: 1px solid rgba(255,255,255,0.1);
-  padding: 11px 16px; border-radius: var(--radius-pill); display: flex; align-items: center; gap: 6px;
+  background: var(--dark-surface); color: #fff; border: 1px solid rgba(255,255,255,.1);
+  padding: 12px 16px; border-radius: var(--radius-pill); display: flex; align-items: center; gap: 6px;
   font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-float);
-  transition: transform 0.2s var(--spring);
+  transition: transform .25s var(--spring);
 }
-.action-pill:active { transform: scale(0.92); }
+.action-pill:active { transform: scale(.9); }
 .action-main {
-  width: 58px; height: 58px; border-radius: 50%; background: #fff; color: var(--dark-bg);
+  width: 60px; height: 60px; border-radius: 50%; background: #fff; color: var(--dark-bg);
   border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
-  box-shadow: var(--shadow-float); transition: transform 0.2s var(--spring);
+  box-shadow: var(--shadow-float); transition: transform .3s var(--spring);
+  animation: pulseGlow 2.5s ease-in-out infinite;
 }
-.action-main:active { transform: scale(0.88) rotate(45deg); }
-.content-area { padding: 52px 18px 24px; max-width: 520px; margin: 0 auto; }
+.action-main:active { transform: scale(.85) rotate(45deg); }
+
+.content-area { padding: 54px 18px 24px; max-width: 520px; margin: 0 auto; }
 .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; margin-top: 10px; }
-.section-title { font-size: 19px; font-weight: 700; letter-spacing: -0.4px; }
+.section-title { font-size: 19px; font-weight: 700; letter-spacing: -.4px; }
 .section-action { font-size: 13px; font-weight: 600; color: var(--blue); background: none; border: none; cursor: pointer; }
+
 .search-bar {
   background: var(--card-bg); border-radius: var(--radius-md); padding: 12px 14px;
   display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-card); margin-bottom: 14px;
+  transition: transform .2s, box-shadow .2s;
 }
+.search-bar:focus-within { box-shadow: 0 0 0 3px rgba(10,132,255,.2); }
 .search-bar input {
   border: none; background: none; outline: none; font-size: 16px; width: 100%;
   font-family: var(--font); color: var(--text-main);
 }
 .search-bar input::placeholder { color: var(--text-muted); }
+
 .budget-card {
   background: var(--card-bg); border-radius: var(--radius-lg); padding: 18px;
-  box-shadow: var(--shadow-card); margin-bottom: 16px;
+  box-shadow: var(--shadow-card); margin-bottom: 16px; animation: slideUpFade .5s .1s both;
 }
 .budget-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
 .budget-bar { height: 10px; background: var(--bg-light); border-radius: 6px; overflow: hidden; margin-bottom: 6px; }
-.budget-fill { height: 100%; border-radius: 6px; transition: width 0.85s var(--spring); }
+.budget-fill { height: 100%; border-radius: 6px; transition: width .9s var(--spring); }
 .budget-status { font-size: 12px; color: var(--text-muted); text-align: right; }
+
 .list-group { display: flex; flex-direction: column; gap: 10px; }
 .item-card {
   background: var(--card-bg); border-radius: var(--radius-lg); padding: 16px;
   display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-card);
-  cursor: pointer; transition: transform 0.2s var(--spring); animation: slideInRight 0.38s var(--ease-out) both;
-  position: relative; overflow: hidden;
+  cursor: pointer; transition: transform .25s var(--spring), box-shadow .25s;
+  animation: slideInRight .45s var(--ease-out) both; position: relative; overflow: hidden;
 }
-.item-card:active { transform: scale(0.975); }
-.item-icon { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.item-card:active { transform: scale(.97); }
+.item-icon { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .3s var(--spring); }
+.item-card:active .item-icon { transform: scale(1.1); }
 .item-info { flex: 1; min-width: 0; }
 .item-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .item-desc { font-size: 12px; color: var(--text-muted); font-weight: 500; }
@@ -162,181 +155,256 @@ body {
 .delete-btn {
   position: absolute; right: 0; top: 0; bottom: 0; width: 68px; background: var(--red);
   color: #fff; display: flex; align-items: center; justify-content: center; border: none;
-  transform: translateX(100%); transition: transform 0.28s var(--spring); cursor: pointer;
+  transform: translateX(100%); transition: transform .3s var(--spring); cursor: pointer;
 }
 .item-card.swiped .delete-btn { transform: translateX(0); }
 .item-card.swiped { transform: translateX(-68px); }
-.chart-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-card); margin-bottom: 16px; }
+
+.chart-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-card); margin-bottom: 16px; animation: slideUpFade .5s both; }
 .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .chart-title { font-size: 15px; font-weight: 600; }
 .time-filters { display: flex; gap: 3px; background: var(--bg-light); padding: 3px; border-radius: var(--radius-sm); }
 .time-filters button {
   background: none; border: none; color: var(--text-muted); font-size: 12px; font-weight: 600;
-  padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s var(--spring);
+  padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: all .25s var(--spring);
 }
-.time-filters button.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.time-filters button.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.stat-box { background: var(--card-bg); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-card); }
+.stat-box { background: var(--card-bg); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-card); transition: transform .25s var(--spring); }
+.stat-box:active { transform: scale(.97); }
 .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; }
-.stat-value { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
+.stat-value { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
+
 .calc-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-card); margin-bottom: 16px; }
 .input-row {
   display: flex; align-items: center; background: var(--bg-light); border-radius: var(--radius-md);
-  padding: 14px; margin-bottom: 20px; border: 2px solid transparent; transition: border-color 0.25s;
+  padding: 14px; margin-bottom: 20px; border: 2px solid transparent; transition: border-color .25s, box-shadow .25s;
 }
-.input-row:focus-within { border-color: var(--blue); }
-.input-row input {
-  background: none; border: none; outline: none; font-size: 26px; font-weight: 700;
-  color: var(--text-main); width: 100%; font-family: var(--font);
-}
+.input-row:focus-within { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(10,132,255,.15); }
+.input-row input { background: none; border: none; outline: none; font-size: 26px; font-weight: 700; color: var(--text-main); width: 100%; font-family: var(--font); }
 .slider-group { margin-bottom: 16px; }
 .slider-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
 input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
 input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%;
-  background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.22); cursor: pointer; margin-top: -7px;
+  -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%;
+  background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.25); cursor: pointer; margin-top: -8px;
+  transition: transform .15s;
 }
+input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2); }
 input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-light); border-radius: 4px; }
 .slider-needs::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--blue) var(--val), var(--bg-light) var(--val)); }
 .slider-wants::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--orange) var(--val), var(--bg-light) var(--val)); }
 .slider-savings::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--green) var(--val), var(--bg-light) var(--val)); }
+
 .profile-header { text-align: center; padding: 16px 0 24px; }
 .profile-avatar-large {
-  width: 104px; height: 104px; border-radius: 50%; background: #E5E5EA; margin: 0 auto 14px;
+  width: 108px; height: 108px; border-radius: 50%; background: #E5E5EA; margin: 0 auto 14px;
   display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
-  cursor: pointer; box-shadow: 0 8px 28px rgba(0,0,0,0.1); transition: transform 0.2s var(--spring);
-  color: var(--text-muted);
+  cursor: pointer; box-shadow: 0 10px 32px rgba(0,0,0,.12); transition: transform .3s var(--spring);
+  color: var(--text-muted); animation: floatY 4s ease-in-out infinite;
 }
 [data-theme="dark"] .profile-avatar-large { background: #2C2C2E; }
-.profile-avatar-large:active { transform: scale(0.95); }
+.profile-avatar-large:active { transform: scale(.92); animation: none; }
 .profile-avatar-large img { width: 100%; height: 100%; object-fit: cover; }
-.profile-name { font-size: 24px; font-weight: 700; margin-bottom: 3px; letter-spacing: -0.4px; }
+.profile-name { font-size: 24px; font-weight: 700; margin-bottom: 3px; letter-spacing: -.4px; }
 .profile-id { font-size: 13px; color: var(--text-muted); font-weight: 500; }
 .settings-row {
   background: var(--card-bg); border-radius: var(--radius-md); padding: 14px 16px;
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-card); transition: transform .2s;
 }
-.settings-row select, .settings-row input[type="text"] {
+.settings-row:active { transform: scale(.98); }
+.settings-row select {
   border: none; background: var(--bg-light); padding: 7px 11px; border-radius: var(--radius-sm);
-  font-family: var(--font); font-weight: 600; font-size: 13px; outline: none; color: var(--text-main);
-  max-width: 140px;
+  font-family: var(--font); font-weight: 600; font-size: 13px; outline: none; color: var(--text-main); max-width: 140px;
 }
+
 .floating-nav {
   position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
   background: var(--dark-bg); padding: 7px; border-radius: var(--radius-pill);
   display: flex; gap: 3px; box-shadow: var(--shadow-float); z-index: 100;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,.1); animation: slideUpFade .6s .2s both;
 }
 .nav-btn {
   background: none; border: none; color: var(--text-light-muted); width: 52px; height: 52px;
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.28s var(--spring);
+  cursor: pointer; transition: all .3s var(--spring);
 }
-.nav-btn svg { width: 21px; height: 21px; transition: transform 0.28s var(--spring); }
-.nav-btn.active { background: rgba(255,255,255,0.14); color: #fff; }
-.nav-btn.active svg { transform: scale(1.08); }
+.nav-btn svg { width: 21px; height: 21px; transition: transform .3s var(--spring); }
+.nav-btn.active { background: rgba(255,255,255,.14); color: #fff; }
+.nav-btn.active svg { transform: scale(1.12); }
+.nav-btn:active { transform: scale(.9); }
+
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.52); backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none;
-  transition: opacity 0.28s var(--ease-out); z-index: 200;
+  position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); opacity: 0; pointer-events: none;
+  transition: opacity .35s var(--ease-out); z-index: 200;
 }
 .modal-overlay.active { opacity: 1; pointer-events: all; }
 .bottom-sheet {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(105%);
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(110%);
   width: 100%; max-width: 520px; background: var(--card-bg);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  padding: 20px 18px calc(22px + env(safe-area-inset-bottom)); z-index: 201;
-  transition: transform 0.42s var(--spring); max-height: 92vh; overflow-y: auto;
+  padding: 20px 18px calc(24px + env(safe-area-inset-bottom)); z-index: 201;
+  transition: transform .5s var(--spring); max-height: 92vh; overflow-y: auto;
 }
 .bottom-sheet.active { transform: translateX(-50%) translateY(0); }
 .sheet-handle { width: 38px; height: 5px; background: #D1D1D6; border-radius: 3px; margin: 0 auto 16px; }
 [data-theme="dark"] .sheet-handle { background: #3A3A3C; }
+
 .input-field {
   background: var(--bg-light); border: 2px solid transparent; border-radius: var(--radius-md);
-  padding: 14px; margin-bottom: 14px; display: flex; align-items: center; transition: border-color 0.25s;
+  padding: 14px; margin-bottom: 14px; display: flex; align-items: center; transition: border-color .25s, box-shadow .25s;
 }
-.input-field:focus-within { border-color: var(--blue); }
-.input-field input {
-  background: none; border: none; outline: none; font-size: 26px; font-weight: 700;
-  color: var(--text-main); width: 100%; font-family: var(--font);
-}
+.input-field:focus-within { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(10,132,255,.12); }
+.input-field input { background: none; border: none; outline: none; font-size: 26px; font-weight: 700; color: var(--text-main); width: 100%; font-family: var(--font); }
 .input-field.small input { font-size: 16px; font-weight: 500; }
 .btn-primary {
   width: 100%; padding: 16px; border-radius: var(--radius-md); border: none;
   background: var(--dark-bg); color: #fff; font-size: 16px; font-weight: 600;
-  cursor: pointer; transition: transform 0.2s var(--spring);
+  cursor: pointer; transition: transform .25s var(--spring), opacity .2s;
 }
-.btn-primary:active { transform: scale(0.97); }
-.btn-secondary {
-  width: 100%; padding: 14px; border-radius: var(--radius-md); border: none;
-  background: var(--bg-light); color: var(--text-main); font-size: 15px; font-weight: 600;
-  cursor: pointer; margin-top: 8px;
+.btn-primary:active { transform: scale(.96); }
+.btn-tg {
+  width: 100%; padding: 16px; border-radius: var(--radius-md); border: none;
+  background: linear-gradient(135deg, #2AABEE, #229ED9); color: #fff; font-size: 16px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform .25s var(--spring); box-shadow: 0 8px 24px rgba(42,171,238,.35);
 }
+.btn-tg:active { transform: scale(.96); }
+
 .cat-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
 .cat-item {
   background: var(--bg-light); border-radius: var(--radius-md); padding: 10px 4px;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   font-size: 10px; font-weight: 600; color: var(--text-muted); cursor: pointer;
-  border: 2px solid transparent; transition: all 0.2s var(--spring);
+  border: 2px solid transparent; transition: all .25s var(--spring);
 }
-.cat-item.active { border-color: var(--blue); background: rgba(10, 132, 255, 0.08); color: var(--blue); transform: scale(1.04); }
+.cat-item.active { border-color: var(--blue); background: rgba(10,132,255,.08); color: var(--blue); transform: scale(1.06); }
+.cat-item:active { transform: scale(.95); }
+
 .goal-card {
   background: var(--card-bg); border-radius: var(--radius-lg); padding: 16px;
-  box-shadow: var(--shadow-card); margin-bottom: 10px;
+  box-shadow: var(--shadow-card); margin-bottom: 10px; animation: slideUpFade .45s both;
+  transition: transform .25s;
 }
+.goal-card:active { transform: scale(.98); }
 .goal-progress { height: 8px; background: var(--bg-light); border-radius: 4px; overflow: hidden; margin: 10px 0 6px; }
-.goal-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--blue), var(--teal)); transition: width 0.6s var(--spring); }
-.chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; -webkit-overflow-scrolling: touch; }
+.goal-fill { height: 100%; border-radius: 4px; transition: width .7s var(--spring); }
+
+.chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.chip-row::-webkit-scrollbar { display: none; }
 .chip {
   flex-shrink: 0; padding: 7px 14px; border-radius: var(--radius-pill); background: var(--card-bg);
   font-size: 12px; font-weight: 600; color: var(--text-muted); border: 1px solid transparent;
-  box-shadow: var(--shadow-card); cursor: pointer;
+  box-shadow: var(--shadow-card); cursor: pointer; transition: all .25s var(--spring);
 }
-.chip.active { background: var(--dark-bg); color: #fff; }
+.chip.active { background: var(--dark-bg); color: #fff; transform: scale(1.04); }
+.chip:active { transform: scale(.95); }
+
 .toast {
-  position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px);
-  background: var(--dark-bg); color: #fff; padding: 12px 20px; border-radius: var(--radius-pill);
-  font-size: 14px; font-weight: 600; z-index: 300; transition: transform 0.35s var(--spring);
-  box-shadow: var(--shadow-float); pointer-events: none;
+  position: fixed; top: 28px; left: 50%; transform: translateX(-50%) translateY(-100px);
+  background: var(--dark-bg); color: #fff; padding: 12px 22px; border-radius: var(--radius-pill);
+  font-size: 14px; font-weight: 600; z-index: 400; transition: transform .4s var(--spring);
+  box-shadow: var(--shadow-float); pointer-events: none; max-width: 90%;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
-.empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
-.empty-state .icon { width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.5; }
+
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); animation: fadeIn .5s; }
+.empty-state .icon { width: 56px; height: 56px; margin: 0 auto 14px; opacity: .4; }
+.empty-state p { font-size: 14px; line-height: 1.5; margin-top: 8px; }
+
 .insight-strip {
-  background: linear-gradient(135deg, rgba(10,132,255,0.12), rgba(100,210,255,0.08));
+  background: linear-gradient(135deg, rgba(10,132,255,.12), rgba(100,210,255,.08));
   border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 14px;
   font-size: 13px; font-weight: 500; color: var(--text-main);
-  border: 1px solid rgba(10,132,255,0.15);
+  border: 1px solid rgba(10,132,255,.15); animation: slideDown .5s both;
 }
+
 .switch {
   position: relative; width: 48px; height: 28px; background: #D1D1D6; border-radius: 14px;
-  cursor: pointer; transition: background 0.25s;
+  cursor: pointer; transition: background .3s;
 }
 .switch.on { background: var(--green); }
 .switch::after {
   content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px;
-  background: #fff; border-radius: 50%; transition: transform 0.25s var(--spring);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  background: #fff; border-radius: 50%; transition: transform .3s var(--spring);
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
 }
 .switch.on::after { transform: translateX(20px); }
-.badge {
-  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px;
-  font-size: 11px; font-weight: 700; background: rgba(52,199,89,0.15); color: var(--green);
+
+.quick-amounts { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.quick-amt {
+  padding: 8px 14px; border-radius: var(--radius-pill); background: var(--bg-light);
+  font-size: 13px; font-weight: 600; border: none; cursor: pointer; color: var(--text-main);
+  transition: all .2s var(--spring);
+}
+.quick-amt:active { transform: scale(.92); background: var(--blue); color: #fff; }
+
+/* Subscribe modal */
+.subscribe-modal {
+  position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  opacity: 0; pointer-events: none; transition: opacity .4s;
+}
+.subscribe-modal.active { opacity: 1; pointer-events: all; }
+.subscribe-card {
+  background: var(--card-bg); border-radius: 28px; padding: 32px 24px; max-width: 340px; width: 90%;
+  text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,.35);
+  transform: scale(.85) translateY(30px); transition: transform .5s var(--spring);
+}
+.subscribe-modal.active .subscribe-card { transform: scale(1) translateY(0); }
+.subscribe-icon {
+  width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #2AABEE, #229ED9);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
+  box-shadow: 0 12px 32px rgba(42,171,238,.4); animation: floatY 3s ease-in-out infinite;
+}
+.subscribe-icon svg { width: 36px; height: 36px; stroke: #fff; fill: none; stroke-width: 2; }
+.subscribe-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; letter-spacing: -.3px; }
+.subscribe-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+.subscribe-note { font-size: 11px; color: var(--text-muted); margin-top: 14px; opacity: .7; }
+
+.streak-badge {
+  display: inline-flex; align-items: center; gap: 4px; background: rgba(255,159,10,.15);
+  color: var(--orange); padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700;
 }
 .hidden { display: none !important; }
+.confetti-piece {
+  position: fixed; width: 8px; height: 8px; border-radius: 2px; z-index: 999;
+  animation: confettiFall 2.2s ease-in forwards; pointer-events: none;
+}
+
 </style>
 </head>
 <body>
 
+<!-- Subscribe modal (once) -->
+<div class="subscribe-modal" id="subscribeModal">
+  <div class="subscribe-card">
+    <div class="subscribe-icon">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9 22 2z"/></svg>
+    </div>
+    <div class="subscribe-title">Подпишитесь на канал</div>
+    <div class="subscribe-desc">Чтобы пользоваться Lunetra, необходимо подписаться на наш Telegram-канал. Там выходят обновления, советы по финансам и новости приложения.</div>
+    <button class="btn-tg" id="btnSubscribe" onclick="doSubscribe()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9 22 2z"/></svg>
+      Подписаться
+    </button>
+    <div class="subscribe-note">После подписки нажмите кнопку — доступ откроется</div>
+  </div>
+</div>
+
 <header class="top-card">
   <div class="header-nav">
     <div class="avatar-wrapper" onclick="switchView('profile')" title="Профиль">
-      <img id="headerAvatarImg" style="display:none;" alt="avatar">
+      <img id="headerAvatarImg" style="display:none;" alt="">
       <div class="icon" id="headerAvatarIcon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="icon-btn" onclick="toggleTheme()" title="Тема" id="themeBtn">
+      <button class="icon-btn" onclick="toggleBalanceHide()" title="Скрыть баланс" id="eyeBtn">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+      </button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Тема">
         <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
       </button>
       <button class="icon-btn" onclick="switchView('analytics')" title="Аналитика">
@@ -344,14 +412,12 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
       </button>
     </div>
   </div>
-
   <div class="wallet-selector" onclick="cycleWallet()">
     <span id="walletName">Основной счёт</span>
     <div class="icon" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
   </div>
   <h1 class="balance-amount" id="mainBalance">0 ₽</h1>
   <div class="balance-sub" id="balanceSub">Доходы: 0 ₽ · Расходы: 0 ₽</div>
-
   <div class="action-floats">
     <button class="action-pill" onclick="openAddModal('income')"><div class="icon" style="width:15px;height:15px;"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div> Доход</button>
     <button class="action-main" onclick="openAddModal('expense')"><div class="icon" style="width:26px;height:26px;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div></button>
@@ -360,49 +426,43 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
 </header>
 
 <div class="content-area">
-  <!-- HOME -->
   <main class="view active" id="view-home">
     <div class="insight-strip" id="insightStrip">Добро пожаловать в Lunetra ✨</div>
-
     <div class="budget-card" id="budgetCard">
-      <div class="budget-header">
-        <span>Бюджет на месяц</span>
-        <span id="budgetText">0 / 0 ₽</span>
-      </div>
-      <div class="budget-bar"><div class="budget-fill" id="budgetFill" style="width: 0%; background: var(--green);"></div></div>
+      <div class="budget-header"><span>Бюджет на месяц</span><span id="budgetText">0 / 0 ₽</span></div>
+      <div class="budget-bar"><div class="budget-fill" id="budgetFill" style="width:0%;background:var(--green);"></div></div>
       <div class="budget-status" id="budgetStatus">Установите лимит в профиле</div>
     </div>
-
     <div class="search-bar">
       <div class="icon" style="color:var(--text-muted);"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
       <input type="text" id="searchInput" placeholder="Поиск, категория, заметка..." oninput="renderTransactions()">
     </div>
-
     <div class="chip-row" id="filterChips">
       <div class="chip active" data-filter="all" onclick="setFilter('all')">Все</div>
       <div class="chip" data-filter="expense" onclick="setFilter('expense')">Расходы</div>
       <div class="chip" data-filter="income" onclick="setFilter('income')">Доходы</div>
       <div class="chip" data-filter="today" onclick="setFilter('today')">Сегодня</div>
       <div class="chip" data-filter="week" onclick="setFilter('week')">Неделя</div>
+      <div class="chip" data-filter="month" onclick="setFilter('month')">Месяц</div>
     </div>
-
     <div class="section-head">
       <h2 class="section-title">Операции</h2>
-      <button class="section-action" onclick="exportCSV()">CSV</button>
+      <div style="display:flex;gap:12px;">
+        <button class="section-action" onclick="undoLastDelete()" id="undoBtn" style="display:none;">↩ Отмена</button>
+        <button class="section-action" onclick="exportCSV()">CSV</button>
+      </div>
     </div>
     <div class="list-group" id="recentTxList"></div>
   </main>
 
-  <!-- ANALYTICS -->
   <main class="view" id="view-analytics">
     <div class="section-head"><h2 class="section-title">Аналитика</h2></div>
     <div class="stats-grid">
-      <div class="stat-box"><div class="stat-label">Доходы</div><div class="stat-value" style="color: var(--green);" id="statIncome">0 ₽</div></div>
-      <div class="stat-box"><div class="stat-label">Расходы</div><div class="stat-value" style="color: var(--red);" id="statExpense">0 ₽</div></div>
+      <div class="stat-box"><div class="stat-label">Доходы</div><div class="stat-value" style="color:var(--green);" id="statIncome">0 ₽</div></div>
+      <div class="stat-box"><div class="stat-label">Расходы</div><div class="stat-value" style="color:var(--red);" id="statExpense">0 ₽</div></div>
       <div class="stat-box"><div class="stat-label">Баланс</div><div class="stat-value" id="statBalance">0 ₽</div></div>
       <div class="stat-box"><div class="stat-label">Средний чек</div><div class="stat-value" id="statAvg">0 ₽</div></div>
     </div>
-
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-title">Динамика расходов</div>
@@ -412,19 +472,16 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
           <button onclick="updateChartRange('year')">Год</button>
         </div>
       </div>
-      <div style="height: 180px;"><canvas id="trendChart"></canvas></div>
+      <div style="height:180px;"><canvas id="trendChart"></canvas></div>
     </div>
-
     <div class="chart-card">
       <div class="chart-header"><div class="chart-title">По категориям</div></div>
-      <div style="height: 210px; display: flex; justify-content: center;"><canvas id="categoryChart"></canvas></div>
+      <div style="height:210px;display:flex;justify-content:center;"><canvas id="categoryChart"></canvas></div>
     </div>
-
     <div class="section-head"><h2 class="section-title">Топ расходов</h2></div>
     <div class="list-group" id="topCatsList"></div>
   </main>
 
-  <!-- GOALS -->
   <main class="view" id="view-goals">
     <div class="section-head">
       <h2 class="section-title">Цели</h2>
@@ -433,11 +490,11 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
     <div id="goalsList"></div>
     <div class="empty-state hidden" id="goalsEmpty">
       <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-      <div>Пока нет целей. Создайте первую!</div>
+      <div>Пока нет целей</div>
+      <p>Создайте первую цель накопления</p>
     </div>
   </main>
 
-  <!-- CALCULATOR -->
   <main class="view" id="view-calculator">
     <div class="section-head"><h2 class="section-title">Распределение</h2></div>
     <div class="calc-card">
@@ -449,7 +506,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
       </div>
       <div class="input-row">
         <input type="text" id="calcInput" inputmode="decimal" placeholder="0" value="100000">
-        <span style="font-size: 22px; font-weight: 700; color: var(--text-muted);" id="calcCurrency">₽</span>
+        <span style="font-size:22px;font-weight:700;color:var(--text-muted);" id="calcCurrency">₽</span>
       </div>
       <div class="slider-group">
         <div class="slider-header"><span>Необходимое</span><span id="lblNeeds">50%</span></div>
@@ -463,75 +520,66 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
         <div class="slider-header"><span>Сбережения</span><span id="lblSavings">20%</span></div>
         <input type="range" id="sliderSavings" class="slider-savings" min="5" max="80" value="20" oninput="updateSliders('savings')">
       </div>
-      <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 10px;" id="calcResults"></div>
+      <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px;" id="calcResults"></div>
     </div>
   </main>
 
-  <!-- PROFILE -->
   <main class="view" id="view-profile">
     <div class="profile-header">
       <div class="profile-avatar-large" onclick="document.getElementById('avatarUpload').click()">
-        <img id="profileAvatarImg" style="display:none;" alt="avatar">
+        <img id="profileAvatarImg" style="display:none;" alt="">
         <div class="icon" id="profileAvatarIcon" style="width:38px;height:38px;"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-        <div style="position:absolute; bottom:0; right:0; background:var(--blue); color:#fff; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid var(--bg-light);">
+        <div style="position:absolute;bottom:0;right:0;background:var(--blue);color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--bg-light);">
           <div class="icon" style="width:13px;height:13px;"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
         </div>
       </div>
       <h2 class="profile-name" id="profileName">Гость</h2>
       <div class="profile-id" id="profileId">Локальный профиль</div>
-      <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
-      <button style="margin: 12px auto 0; background:var(--bg-light); border:none; padding:9px 18px; border-radius:var(--radius-pill); font-weight:600; font-size:13px; cursor:pointer; color:var(--text-main);" onclick="editName()">Изменить имя</button>
+      <div id="streakWrap" style="margin-top:10px;"></div>
+      <input type="file" id="avatarUpload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+      <button style="margin:12px auto 0;background:var(--bg-light);border:none;padding:9px 18px;border-radius:var(--radius-pill);font-weight:600;font-size:13px;cursor:pointer;color:var(--text-main);" onclick="editName()">Изменить имя</button>
     </div>
-
     <div class="settings-row">
-      <span style="font-weight:600; font-size:14px;">Валюта</span>
+      <span style="font-weight:600;font-size:14px;">Валюта</span>
       <select id="currencySelect" onchange="changeCurrency(this.value)">
-        <option value="₽">Рубль (₽)</option>
-        <option value="$">Доллар ($)</option>
-        <option value="€">Евро (€)</option>
-        <option value="₸">Тенге (₸)</option>
-        <option value="£">Фунт (£)</option>
-        <option value="¥">Йена (¥)</option>
+        <option value="₽">Рубль (₽)</option><option value="$">Доллар ($)</option>
+        <option value="€">Евро (€)</option><option value="₸">Тенге (₸)</option>
+        <option value="£">Фунт (£)</option><option value="¥">Йена (¥)</option>
       </select>
     </div>
-    
     <div class="settings-row">
-      <span style="font-weight:600; font-size:14px;">Месячный бюджет</span>
-      <button onclick="setBudget()" style="background:var(--blue); color:#fff; border:none; padding:7px 14px; border-radius:var(--radius-sm); font-weight:600; font-size:13px; cursor:pointer;">Изменить</button>
+      <span style="font-weight:600;font-size:14px;">Месячный бюджет</span>
+      <button onclick="setBudget()" style="background:var(--blue);color:#fff;border:none;padding:7px 14px;border-radius:var(--radius-sm);font-weight:600;font-size:13px;cursor:pointer;">Изменить</button>
     </div>
-
-    <div class="settings-row">
-      <span style="font-weight:600; font-size:14px;">Тёмная тема</span>
-      <div class="switch" id="themeSwitch" onclick="toggleTheme()"></div>
-    </div>
-
-    <div class="settings-row">
-      <span style="font-weight:600; font-size:14px;">Haptic (вибрация)</span>
-      <div class="switch on" id="hapticSwitch" onclick="toggleHaptic()"></div>
-    </div>
-
-    <div class="list-group" style="margin-top: 16px;">
+    <div class="settings-row"><span style="font-weight:600;font-size:14px;">Тёмная тема</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div>
+    <div class="settings-row"><span style="font-weight:600;font-size:14px;">Скрыть баланс</span><div class="switch" id="hideBalanceSwitch" onclick="toggleBalanceHide()"></div></div>
+    <div class="settings-row"><span style="font-weight:600;font-size:14px;">Haptic</span><div class="switch on" id="hapticSwitch" onclick="toggleHaptic()"></div></div>
+    <div class="settings-row"><span style="font-weight:600;font-size:14px;">Компактный список</span><div class="switch" id="compactSwitch" onclick="toggleCompact()"></div></div>
+    <div class="list-group" style="margin-top:16px;">
       <div class="item-card" onclick="exportData()">
-        <div class="item-icon" style="background: #E5F1FF; color: #0A84FF;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div></div>
+        <div class="item-icon" style="background:#E5F1FF;color:#0A84FF;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div></div>
         <div class="item-info"><div class="item-name">Экспорт JSON</div><div class="item-desc">Полная копия данных</div></div>
       </div>
       <div class="item-card" onclick="exportCSV()">
-        <div class="item-icon" style="background: #E8F8EF; color: #34C759;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div></div>
-        <div class="item-info"><div class="item-name">Экспорт CSV</div><div class="item-desc">Для Excel / Google Sheets</div></div>
+        <div class="item-icon" style="background:#E8F8EF;color:#30D158;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div></div>
+        <div class="item-info"><div class="item-name">Экспорт CSV</div><div class="item-desc">Для Excel / Sheets</div></div>
       </div>
       <div class="item-card" onclick="document.getElementById('importFile').click()">
-        <div class="item-icon" style="background: #F3E8FF; color: #BF5AF2;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div></div>
+        <div class="item-icon" style="background:#F3E8FF;color:#BF5AF2;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div></div>
         <div class="item-info"><div class="item-name">Импорт данных</div><div class="item-desc">Восстановить из JSON</div></div>
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
       <div class="item-card" onclick="clearHistory()">
-        <div class="item-icon" style="background: #FFF0F0; color: #FF3B30;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div></div>
+        <div class="item-icon" style="background:#FFF0F0;color:#FF453A;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div></div>
         <div class="item-info"><div class="item-name">Очистить историю</div><div class="item-desc">Удалить все транзакции</div></div>
       </div>
+      <div class="item-card" onclick="window.open('https://t.me/lunetra0','_blank')">
+        <div class="item-icon" style="background:#E8F4FD;color:#2AABEE;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9 22 2z"/></svg></div></div>
+        <div class="item-info"><div class="item-name">Telegram-канал</div><div class="item-desc">@lunetra0</div></div>
+      </div>
     </div>
-
-    <div style="text-align:center; margin-top:28px; font-size:12px; color:var(--text-muted);">
-      Lunetra v1.0 · Приватный трекер<br>Данные хранятся только на вашем устройстве
+    <div style="text-align:center;margin-top:28px;font-size:12px;color:var(--text-muted);">
+      Lunetra v1.2 · Приватный трекер<br>Данные только на вашем устройстве
     </div>
   </main>
 </div>
@@ -544,30 +592,34 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
   <button class="nav-btn" data-view="profile" onclick="switchView('profile')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></button>
 </nav>
 
-<!-- Add Transaction Sheet -->
 <div class="modal-overlay" id="addOverlay" onclick="closeAddModal()"></div>
 <div class="bottom-sheet" id="addSheet">
   <div class="sheet-handle"></div>
-  <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-    <button id="btnTypeExpense" class="btn-primary" style="background: var(--dark-bg); color: #fff;" onclick="setFormType('expense')">Расход</button>
-    <button id="btnTypeIncome" class="btn-primary" style="background: var(--bg-light); color: var(--text-muted);" onclick="setFormType('income')">Доход</button>
+  <div style="display:flex;gap:8px;margin-bottom:16px;">
+    <button id="btnTypeExpense" class="btn-primary" style="background:var(--dark-bg);color:#fff;" onclick="setFormType('expense')">Расход</button>
+    <button id="btnTypeIncome" class="btn-primary" style="background:var(--bg-light);color:var(--text-muted);" onclick="setFormType('income')">Доход</button>
   </div>
   <div class="input-field">
     <input type="text" id="amountInput" inputmode="decimal" placeholder="0" autocomplete="off">
-    <span style="font-size: 26px; font-weight: 700; color: var(--text-muted);" id="modalCurrency">₽</span>
+    <span style="font-size:26px;font-weight:700;color:var(--text-muted);" id="modalCurrency">₽</span>
   </div>
-  <div class="input-field small">
-    <input type="text" id="noteInput" placeholder="Заметка (необязательно)" autocomplete="off">
+  <div class="quick-amounts" id="quickAmounts">
+    <button class="quick-amt" onclick="setQuick(100)">+100</button>
+    <button class="quick-amt" onclick="setQuick(500)">+500</button>
+    <button class="quick-amt" onclick="setQuick(1000)">+1 000</button>
+    <button class="quick-amt" onclick="setQuick(5000)">+5 000</button>
+    <button class="quick-amt" onclick="setQuick(10000)">+10 000</button>
   </div>
+  <div class="input-field small"><input type="text" id="noteInput" placeholder="Заметка (необязательно)" autocomplete="off"></div>
+  <div class="input-field small"><input type="date" id="dateInput" style="font-size:15px;font-weight:500;color:var(--text-main);background:none;border:none;outline:none;width:100%;font-family:var(--font);"></div>
   <div class="cat-selector" id="catSelector"></div>
   <button class="btn-primary" onclick="submitTransaction()">Добавить</button>
 </div>
 
-<!-- Goal Sheet -->
 <div class="modal-overlay" id="goalOverlay" onclick="closeGoalModal()"></div>
 <div class="bottom-sheet" id="goalSheet">
   <div class="sheet-handle"></div>
-  <h3 style="margin-bottom:14px; font-size:18px;">Новая цель</h3>
+  <h3 style="margin-bottom:14px;font-size:18px;">Новая цель</h3>
   <div class="input-field small"><input type="text" id="goalName" placeholder="Название цели"></div>
   <div class="input-field"><input type="text" id="goalTarget" inputmode="decimal" placeholder="Сумма"><span style="font-size:20px;font-weight:700;color:var(--text-muted);" id="goalCurrency">₽</span></div>
   <div class="input-field small"><input type="text" id="goalCurrent" inputmode="decimal" placeholder="Уже накоплено (0)"></div>
@@ -577,36 +629,33 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cur
 <div class="toast" id="toast"></div>
 
 <script>
-/* Full app logic is in the complete version. This is a working core. */
+
 const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); if (tg.setHeaderColor) tg.setHeaderColor('#0F0F12'); }
-const STORAGE_KEY = 'lunetra_v1';
+if (tg) { tg.ready(); tg.expand(); if (tg.setHeaderColor) tg.setHeaderColor('#0B0B0E'); }
+
+const STORAGE_KEY = 'lunetra_v12';
+const SUB_KEY = 'lunetra_subscribed_v1';
 const defaultState = {
   user: { name: tg?.initDataUnsafe?.user?.first_name || 'Гость', avatar: null, id: tg?.initDataUnsafe?.user?.id || 'local' },
-  currency: '₽', budget: 0, theme: 'light', haptic: true, currentWallet: 0,
+  currency: '₽', budget: 0, theme: 'light', haptic: true, hideBalance: false, compact: false,
+  currentWallet: 0, lastActive: null, streak: 0,
   wallets: [{ id: 'main', name: 'Основной счёт' }, { id: 'cash', name: 'Наличные' }, { id: 'card', name: 'Карта' }],
-  transactions: [
-    { id: '1', type: 'income', amount: 120000, category: 'salary', note: 'Зарплата', date: new Date(Date.now() - 86400000 * 6).toISOString(), wallet: 'main' },
-    { id: '2', type: 'expense', amount: 4500, category: 'food', note: 'Продукты', date: new Date(Date.now() - 86400000 * 5).toISOString(), wallet: 'main' },
-    { id: '3', type: 'expense', amount: 2800, category: 'transport', note: '', date: new Date(Date.now() - 86400000 * 4).toISOString(), wallet: 'main' },
-    { id: '4', type: 'expense', amount: 12000, category: 'fun', note: 'Кино + ужин', date: new Date(Date.now() - 86400000 * 3).toISOString(), wallet: 'main' },
-    { id: '5', type: 'expense', amount: 3500, category: 'shopping', note: '', date: new Date(Date.now() - 86400000 * 2).toISOString(), wallet: 'main' },
-    { id: '6', type: 'income', amount: 15000, category: 'freelance', note: 'Проект', date: new Date(Date.now() - 86400000 * 1).toISOString(), wallet: 'main' }
-  ],
-  goals: [
-    { id: 'g1', name: 'Отпуск', target: 150000, current: 42000, color: '#0A84FF' },
-    { id: 'g2', name: 'Новый ноутбук', target: 90000, current: 25000, color: '#BF5AF2' }
-  ]
+  transactions: [],
+  goals: [],
+  lastDeleted: null
 };
+
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState;
-if (!state.wallets) state.wallets = defaultState.wallets;
-if (!state.goals) state.goals = defaultState.goals;
-if (state.theme === undefined) state.theme = 'light';
-if (state.haptic === undefined) state.haptic = true;
+['wallets','goals','transactions','theme','haptic','hideBalance','compact','streak'].forEach(k => {
+  if (state[k] === undefined) state[k] = defaultState[k];
+});
 if (state.currentWallet === undefined) state.currentWallet = 0;
+
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
 let nf = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
 function fmt(val) { return nf.format(Math.round(val || 0)) + ' ' + state.currency; }
+
 function haptic(type = 'light') {
   if (!state.haptic || !tg?.HapticFeedback) return;
   if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
@@ -614,12 +663,42 @@ function haptic(type = 'light') {
   else if (type === 'medium') tg.HapticFeedback.impactOccurred('medium');
   else tg.HapticFeedback.impactOccurred('light');
 }
-function toast(msg, ms = 2200) {
+
+function toast(msg, ms = 2400) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+  el.textContent = msg; el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), ms);
 }
+
+function confetti() {
+  const colors = ['#0A84FF','#30D158','#FF9F0A','#BF5AF2','#FF375F','#64D2FF'];
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = colors[i % colors.length];
+    p.style.animationDelay = (Math.random() * .4) + 's';
+    p.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 3200);
+  }
+}
+
+/* Subscribe once */
+function checkSubscribe() {
+  if (localStorage.getItem(SUB_KEY) === '1') return;
+  setTimeout(() => document.getElementById('subscribeModal').classList.add('active'), 400);
+}
+function doSubscribe() {
+  window.open('https://t.me/lunetra0', '_blank');
+  localStorage.setItem(SUB_KEY, '1');
+  document.getElementById('subscribeModal').classList.remove('active');
+  haptic('success');
+  toast('Спасибо! Добро пожаловать ✨');
+  confetti();
+}
+
+/* Categories */
 const SVG_ICONS = {
   food: '<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>',
   transport: '<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
@@ -636,21 +715,16 @@ const SVG_ICONS = {
   income: '<svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'
 };
 const CATEGORIES = [
-  { id: 'food', name: 'Еда', color: '#FF9F0A' },
-  { id: 'transport', name: 'Транспорт', color: '#0A84FF' },
-  { id: 'fun', name: 'Развлечения', color: '#BF5AF2' },
-  { id: 'health', name: 'Здоровье', color: '#FF375F' },
-  { id: 'shopping', name: 'Покупки', color: '#5E5CE6' },
-  { id: 'bills', name: 'Счета', color: '#FF9F0A' },
-  { id: 'education', name: 'Образование', color: '#64D2FF' },
-  { id: 'gifts', name: 'Подарки', color: '#FF375F' },
-  { id: 'salary', name: 'Зарплата', color: '#34C759' },
-  { id: 'freelance', name: 'Фриланс', color: '#30D158' },
-  { id: 'investment', name: 'Инвестиции', color: '#0A84FF' },
-  { id: 'other', name: 'Другое', color: '#8E8E93' },
-  { id: 'income', name: 'Доход', color: '#34C759' }
+  { id: 'food', name: 'Еда', color: '#FF9F0A' }, { id: 'transport', name: 'Транспорт', color: '#0A84FF' },
+  { id: 'fun', name: 'Развлечения', color: '#BF5AF2' }, { id: 'health', name: 'Здоровье', color: '#FF375F' },
+  { id: 'shopping', name: 'Покупки', color: '#5E5CE6' }, { id: 'bills', name: 'Счета', color: '#FF9F0A' },
+  { id: 'education', name: 'Образование', color: '#64D2FF' }, { id: 'gifts', name: 'Подарки', color: '#FF375F' },
+  { id: 'salary', name: 'Зарплата', color: '#30D158' }, { id: 'freelance', name: 'Фриланс', color: '#30D158' },
+  { id: 'investment', name: 'Инвестиции', color: '#0A84FF' }, { id: 'other', name: 'Другое', color: '#8E8E93' },
+  { id: 'income', name: 'Доход', color: '#30D158' }
 ];
 const getCat = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES.find(c => c.id === 'other');
+
 function switchView(viewName) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const el = document.getElementById('view-' + viewName);
@@ -661,23 +735,28 @@ function switchView(viewName) {
   if (viewName === 'calculator') calculateRule();
   if (viewName === 'goals') renderGoals();
   if (viewName === 'home') renderHome();
+  if (viewName === 'profile') updateStreakUI();
 }
+
 function animateValue(obj, start, end, duration) {
   let startTimestamp = null;
-  const step = (timestamp) => {
-    if (!startTimestamp) startTimestamp = timestamp;
-    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+  const step = (ts) => {
+    if (!startTimestamp) startTimestamp = ts;
+    const progress = Math.min((ts - startTimestamp) / duration, 1);
     const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-    const current = Math.floor(easeOut * (end - start) + start);
-    obj.textContent = fmt(current);
-    if (progress < 1) window.requestAnimationFrame(step);
+    obj.textContent = fmt(Math.floor(easeOut * (end - start) + start));
+    if (progress < 1) requestAnimationFrame(step);
   };
-  window.requestAnimationFrame(step);
+  requestAnimationFrame(step);
 }
+
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
-  const sw = document.getElementById('themeSwitch');
-  if (sw) sw.classList.toggle('on', state.theme === 'dark');
+  document.getElementById('themeSwitch')?.classList.toggle('on', state.theme === 'dark');
+  document.getElementById('hideBalanceSwitch')?.classList.toggle('on', state.hideBalance);
+  document.getElementById('compactSwitch')?.classList.toggle('on', state.compact);
+  document.getElementById('hapticSwitch')?.classList.toggle('on', state.haptic);
+  document.querySelector('.top-card')?.classList.toggle('balance-hidden', state.hideBalance);
 }
 function toggleTheme() {
   state.theme = state.theme === 'dark' ? 'light' : 'dark';
@@ -689,47 +768,74 @@ function toggleHaptic() {
   document.getElementById('hapticSwitch').classList.toggle('on', state.haptic);
   toast(state.haptic ? 'Вибрация вкл' : 'Вибрация выкл');
 }
+function toggleBalanceHide() {
+  state.hideBalance = !state.hideBalance; saveState(); applyTheme();
+  haptic('light'); toast(state.hideBalance ? 'Баланс скрыт' : 'Баланс виден');
+}
+function toggleCompact() {
+  state.compact = !state.compact; saveState();
+  document.getElementById('compactSwitch').classList.toggle('on', state.compact);
+  renderTransactions(); toast(state.compact ? 'Компактный режим' : 'Обычный режим');
+}
+
 function cycleWallet() {
   state.currentWallet = (state.currentWallet + 1) % state.wallets.length;
   saveState();
   document.getElementById('walletName').textContent = state.wallets[state.currentWallet].name;
   renderHome(); haptic('light');
 }
+
+/* Streak */
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (state.lastActive === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (state.lastActive === yesterday) state.streak = (state.streak || 0) + 1;
+  else state.streak = 1;
+  state.lastActive = today;
+  saveState();
+}
+function updateStreakUI() {
+  const el = document.getElementById('streakWrap');
+  if (!el) return;
+  if (state.streak > 1) el.innerHTML = `<span class="streak-badge">🔥 ${state.streak} дн. подряд</span>`;
+  else el.innerHTML = '';
+}
+
 let currentFilter = 'all';
 function setFilter(f) {
   currentFilter = f;
   document.querySelectorAll('#filterChips .chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
   renderTransactions(); haptic('light');
 }
+
 function getFilteredTx() {
   let list = [...state.transactions];
   const now = new Date();
   if (currentFilter === 'expense') list = list.filter(t => t.type === 'expense');
   if (currentFilter === 'income') list = list.filter(t => t.type === 'income');
-  if (currentFilter === 'today') {
-    const today = now.toDateString();
-    list = list.filter(t => new Date(t.date).toDateString() === today);
-  }
-  if (currentFilter === 'week') {
-    const weekAgo = now.getTime() - 7 * 86400000;
-    list = list.filter(t => new Date(t.date).getTime() >= weekAgo);
-  }
+  if (currentFilter === 'today') list = list.filter(t => new Date(t.date).toDateString() === now.toDateString());
+  if (currentFilter === 'week') list = list.filter(t => now - new Date(t.date) < 7 * 86400000);
+  if (currentFilter === 'month') list = list.filter(t => now - new Date(t.date) < 30 * 86400000);
   const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
   if (q) {
     list = list.filter(t => {
       const cat = getCat(t.category);
-      return cat.name.toLowerCase().includes(q) || (t.note || '').toLowerCase().includes(q);
+      return cat.name.toLowerCase().includes(q) || (t.note || '').toLowerCase().includes(q) || String(t.amount).includes(q);
     });
   }
   return list.sort((a, b) => new Date(b.date) - new Date(a.date));
 }
+
 function renderHome() {
+  updateStreak();
   const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
-  animateValue(document.getElementById('mainBalance'), 0, balance, 1100);
+  animateValue(document.getElementById('mainBalance'), 0, balance, 1000);
   document.getElementById('balanceSub').textContent = `Доходы: ${fmt(totalIncome)} · Расходы: ${fmt(totalExpense)}`;
   document.getElementById('walletName').textContent = state.wallets[state.currentWallet]?.name || 'Основной счёт';
+
   const bFill = document.getElementById('budgetFill');
   const bText = document.getElementById('budgetText');
   const bStatus = document.getElementById('budgetStatus');
@@ -740,76 +846,77 @@ function renderHome() {
     bText.textContent = `${fmt(totalExpense)} / ${fmt(state.budget)}`;
     bStatus.textContent = pct >= 100 ? 'Лимит превышен!' : `Осталось: ${fmt(state.budget - totalExpense)}`;
   } else {
-    bFill.style.width = '0%';
-    bText.textContent = 'Не установлен';
+    bFill.style.width = '0%'; bText.textContent = 'Не установлен';
     bStatus.textContent = 'Установите лимит в профиле';
   }
+
   const insight = document.getElementById('insightStrip');
-  if (totalExpense === 0 && totalIncome === 0) {
+  if (!state.transactions.length) {
     insight.textContent = 'Добавьте первую операцию — и Lunetra покажет динамику ✨';
   } else if (state.budget > 0 && totalExpense / state.budget > 0.85) {
-    insight.textContent = '⚠️ Бюджет почти исчерпан. Пора притормозить расходы.';
+    insight.textContent = '⚠️ Бюджет почти исчерпан. Пора притормозить.';
   } else if (totalIncome > totalExpense * 1.3) {
-    insight.textContent = 'Отлично! Доходы заметно выше расходов. Продолжайте 💪';
+    insight.textContent = 'Отлично! Доходы заметно выше расходов 💪';
   } else {
-    const top = Object.entries(
-      state.transactions.filter(t => t.type === 'expense').reduce((a, t) => {
-        a[t.category] = (a[t.category] || 0) + t.amount; return a;
-      }, {})
-    ).sort((a, b) => b[1] - a[1])[0];
-    if (top) insight.textContent = `Больше всего тратите на «${getCat(top[0]).name}» — ${fmt(top[1])}`;
-    else insight.textContent = 'Ваши финансы под контролем ✨';
+    const top = Object.entries(state.transactions.filter(t => t.type === 'expense').reduce((a, t) => {
+      a[t.category] = (a[t.category] || 0) + t.amount; return a;
+    }, {})).sort((a, b) => b[1] - a[1])[0];
+    insight.textContent = top ? `Больше всего тратите на «${getCat(top[0]).name}» — ${fmt(top[1])}` : 'Ваши финансы под контролем ✨';
   }
+
   updateAvatarUI();
   renderTransactions();
   updateCurrencyUI();
   applyTheme();
+  document.getElementById('undoBtn').style.display = state.lastDeleted ? 'inline' : 'none';
 }
+
 function renderTransactions() {
   const list = document.getElementById('recentTxList');
-  const filtered = getFilteredTx().slice(0, 40);
+  const filtered = getFilteredTx().slice(0, 50);
   if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div>Ничего не найдено</div></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div>Пока пусто</div><p>Нажмите + чтобы добавить первую операцию</p></div>`;
     return;
   }
+  const pad = state.compact ? '12px' : '16px';
   list.innerHTML = filtered.map((t, i) => {
     const c = getCat(t.category);
     const sign = t.type === 'income' ? '+' : '−';
     const dateStr = new Date(t.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
     const note = t.note ? ` · ${t.note}` : '';
-    return `
-      <div class="item-card" style="animation-delay: ${Math.min(i * 0.04, 0.4)}s" onclick="toggleSwipe(this)">
-        <div class="item-icon" style="background: ${c.color}18; color: ${c.color}; z-index:2;">
-          <div class="icon">${SVG_ICONS[c.id] || SVG_ICONS.other}</div>
-        </div>
-        <div class="item-info" style="z-index:2;">
-          <div class="item-name">${c.name}${note}</div>
-          <div class="item-desc">${dateStr}</div>
-        </div>
-        <div class="item-right" style="z-index:2;">
-          <div class="item-amount ${t.type}">${sign}${fmt(t.amount)}</div>
-        </div>
-        <button class="delete-btn" onclick="deleteTransaction('${t.id}', event)">
-          <div class="icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
-        </button>
-      </div>`;
+    return `<div class="item-card" style="padding:${pad};animation-delay:${Math.min(i * .04, .5)}s" onclick="toggleSwipe(this)">
+      <div class="item-icon" style="background:${c.color}18;color:${c.color};z-index:2;"><div class="icon">${SVG_ICONS[c.id] || SVG_ICONS.other}</div></div>
+      <div class="item-info" style="z-index:2;"><div class="item-name">${c.name}${note}</div><div class="item-desc">${dateStr}</div></div>
+      <div class="item-right" style="z-index:2;"><div class="item-amount ${t.type}">${sign}${fmt(t.amount)}</div></div>
+      <button class="delete-btn" onclick="deleteTransaction('${t.id}', event)"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div></button>
+    </div>`;
   }).join('');
 }
+
 function toggleSwipe(el) {
   const isSwiped = el.classList.contains('swiped');
   document.querySelectorAll('.item-card').forEach(c => c.classList.remove('swiped'));
   if (!isSwiped) { el.classList.add('swiped'); haptic('medium'); }
 }
+
 function deleteTransaction(id, event) {
   event.stopPropagation();
-  if (confirm('Удалить эту операцию?')) {
-    state.transactions = state.transactions.filter(t => t.id !== id);
-    saveState(); renderHome(); haptic('success'); toast('Удалено');
-  }
+  if (!confirm('Удалить эту операцию?')) return;
+  const tx = state.transactions.find(t => t.id === id);
+  if (tx) state.lastDeleted = { ...tx };
+  state.transactions = state.transactions.filter(t => t.id !== id);
+  saveState(); renderHome(); haptic('success'); toast('Удалено · можно отменить');
 }
-let trendChartInstance = null;
-let categoryChartInstance = null;
-let currentChartRange = 'week';
+
+function undoLastDelete() {
+  if (!state.lastDeleted) return;
+  state.transactions.push(state.lastDeleted);
+  state.lastDeleted = null;
+  saveState(); renderHome(); haptic('success'); toast('Восстановлено');
+}
+
+/* Charts */
+let trendChartInstance = null, categoryChartInstance = null, currentChartRange = 'week';
 function updateChartRange(range) {
   currentChartRange = range;
   document.querySelectorAll('.time-filters button').forEach(b => b.classList.remove('active'));
@@ -820,28 +927,19 @@ function buildTrendData() {
   const now = new Date();
   let labels = [], buckets = [];
   if (currentChartRange === 'week') {
-    labels = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-    buckets = Array(7).fill(0);
+    labels = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']; buckets = Array(7).fill(0);
     state.transactions.filter(t => t.type === 'expense').forEach(t => {
       const d = new Date(t.date);
-      if (now - d < 7 * 86400000) {
-        const day = (d.getDay() + 6) % 7;
-        buckets[day] += t.amount;
-      }
+      if (now - d < 7 * 86400000) buckets[(d.getDay() + 6) % 7] += t.amount;
     });
   } else if (currentChartRange === 'month') {
-    labels = ['1 нед','2 нед','3 нед','4 нед'];
-    buckets = Array(4).fill(0);
+    labels = ['1 нед','2 нед','3 нед','4 нед']; buckets = Array(4).fill(0);
     state.transactions.filter(t => t.type === 'expense').forEach(t => {
       const d = new Date(t.date);
-      if (now - d < 30 * 86400000) {
-        const week = Math.min(3, Math.floor((now - d) / (7 * 86400000)));
-        buckets[3 - week] += t.amount;
-      }
+      if (now - d < 30 * 86400000) buckets[3 - Math.min(3, Math.floor((now - d) / (7 * 86400000)))] += t.amount;
     });
   } else {
-    labels = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-    buckets = Array(12).fill(0);
+    labels = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']; buckets = Array(12).fill(0);
     state.transactions.filter(t => t.type === 'expense').forEach(t => {
       const d = new Date(t.date);
       if (d.getFullYear() === now.getFullYear()) buckets[d.getMonth()] += t.amount;
@@ -857,45 +955,41 @@ function initCharts() {
   document.getElementById('statExpense').textContent = fmt(totalExpense);
   document.getElementById('statBalance').textContent = fmt(totalIncome - totalExpense);
   document.getElementById('statAvg').textContent = fmt(totalExpense / expCount);
+
   const { labels, data } = buildTrendData();
-  const ctxTrend = document.getElementById('trendChart').getContext('2d');
+  const ctx = document.getElementById('trendChart').getContext('2d');
   if (trendChartInstance) trendChartInstance.destroy();
-  const gradient = ctxTrend.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, 'rgba(10, 132, 255, 0.25)');
-  gradient.addColorStop(1, 'rgba(10, 132, 255, 0)');
-  trendChartInstance = new Chart(ctxTrend, {
+  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(10,132,255,.28)'); gradient.addColorStop(1, 'rgba(10,132,255,0)');
+  trendChartInstance = new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets: [{ data, borderColor: '#0A84FF', backgroundColor: gradient, borderWidth: 3, tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: '#0A84FF' }] },
-    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 900 }, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { display: false } } }
+    data: { labels, datasets: [{ data, borderColor: '#0A84FF', backgroundColor: gradient, borderWidth: 3, tension: .4, fill: true, pointRadius: 3, pointBackgroundColor: '#0A84FF' }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 1000 }, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { display: false } } }
   });
+
   const catSums = {};
   state.transactions.filter(t => t.type === 'expense').forEach(t => { catSums[t.category] = (catSums[t.category] || 0) + t.amount; });
   const entries = Object.entries(catSums).sort((a, b) => b[1] - a[1]);
-  const catData = entries.map(e => e[1]);
-  const catColors = entries.map(e => getCat(e[0]).color);
-  const catLabels = entries.map(e => getCat(e[0]).name);
   if (categoryChartInstance) categoryChartInstance.destroy();
   categoryChartInstance = new Chart(document.getElementById('categoryChart').getContext('2d'), {
     type: 'doughnut',
-    data: { labels: catLabels.length ? catLabels : ['Нет данных'], datasets: [{ data: catData.length ? catData : [1], backgroundColor: catColors.length ? catColors : ['#E5E5EA'], borderWidth: 0 }] },
+    data: { labels: entries.length ? entries.map(e => getCat(e[0]).name) : ['Нет данных'], datasets: [{ data: entries.length ? entries.map(e => e[1]) : [1], backgroundColor: entries.length ? entries.map(e => getCat(e[0]).color) : ['#E5E5EA'], borderWidth: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, cutout: '72%', animation: { animateScale: true }, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { size: 11 } } } } }
   });
-  const topList = document.getElementById('topCatsList');
-  topList.innerHTML = entries.slice(0, 5).map(([id, sum], i) => {
-    const c = getCat(id);
-    const pct = totalExpense ? Math.round((sum / totalExpense) * 100) : 0;
-    return `<div class="item-card" style="animation-delay:${i*0.05}s"><div class="item-icon" style="background:${c.color}18;color:${c.color}"><div class="icon">${SVG_ICONS[c.id] || SVG_ICONS.other}</div></div><div class="item-info"><div class="item-name">${c.name}</div><div class="item-desc">${pct}% от расходов</div></div><div class="item-right"><div class="item-amount">${fmt(sum)}</div></div></div>`;
+
+  document.getElementById('topCatsList').innerHTML = entries.slice(0, 5).map(([id, sum], i) => {
+    const c = getCat(id); const pct = totalExpense ? Math.round((sum / totalExpense) * 100) : 0;
+    return `<div class="item-card" style="animation-delay:${i*.05}s"><div class="item-icon" style="background:${c.color}18;color:${c.color}"><div class="icon">${SVG_ICONS[c.id] || SVG_ICONS.other}</div></div><div class="item-info"><div class="item-name">${c.name}</div><div class="item-desc">${pct}% от расходов</div></div><div class="item-right"><div class="item-amount">${fmt(sum)}</div></div></div>`;
   }).join('') || '<div class="empty-state">Пока нет расходов</div>';
 }
+
 function changeCurrency(val) {
   state.currency = val; saveState(); updateCurrencyUI(); renderHome();
   if (document.getElementById('view-analytics').classList.contains('active')) initCharts();
   toast('Валюта изменена');
 }
 function updateCurrencyUI() {
-  document.getElementById('calcCurrency').textContent = state.currency;
-  document.getElementById('modalCurrency').textContent = state.currency;
-  document.getElementById('goalCurrency').textContent = state.currency;
+  ['calcCurrency','modalCurrency','goalCurrency'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = state.currency; });
   document.getElementById('currencySelect').value = state.currency;
 }
 function setBudget() {
@@ -905,6 +999,7 @@ function setBudget() {
     if (!isNaN(num) && num >= 0) { state.budget = num; saveState(); renderHome(); toast('Бюджет обновлён'); }
   }
 }
+
 function setRule(rule) {
   document.querySelectorAll('[data-rule]').forEach(c => c.classList.toggle('active', c.dataset.rule === rule));
   if (rule === '503020') { document.getElementById('sliderNeeds').value = 50; document.getElementById('sliderWants').value = 30; document.getElementById('sliderSavings').value = 20; }
@@ -913,26 +1008,13 @@ function setRule(rule) {
   updateSliders('needs'); haptic('light');
 }
 function updateSliders(changed) {
-  let n = parseInt(document.getElementById('sliderNeeds').value);
-  let w = parseInt(document.getElementById('sliderWants').value);
-  let s = parseInt(document.getElementById('sliderSavings').value);
-  if (changed === 'needs') {
-    const rest = 100 - n; const ratio = (w + s) || 1;
-    w = Math.round(rest * (w / ratio)); s = rest - w;
-  } else if (changed === 'wants') {
-    const rest = 100 - w; const ratio = (n + s) || 1;
-    n = Math.round(rest * (n / ratio)); s = rest - n;
-  } else {
-    const rest = 100 - s; const ratio = (n + w) || 1;
-    n = Math.round(rest * (n / ratio)); w = rest - n;
-  }
+  let n = +document.getElementById('sliderNeeds').value, w = +document.getElementById('sliderWants').value, s = +document.getElementById('sliderSavings').value;
+  if (changed === 'needs') { const rest = 100 - n, ratio = (w + s) || 1; w = Math.round(rest * (w / ratio)); s = rest - w; }
+  else if (changed === 'wants') { const rest = 100 - w, ratio = (n + s) || 1; n = Math.round(rest * (n / ratio)); s = rest - n; }
+  else { const rest = 100 - s, ratio = (n + w) || 1; n = Math.round(rest * (n / ratio)); w = rest - n; }
   n = Math.max(0, Math.min(100, n)); w = Math.max(0, Math.min(100, w)); s = Math.max(0, 100 - n - w);
-  document.getElementById('sliderNeeds').value = n;
-  document.getElementById('sliderWants').value = w;
-  document.getElementById('sliderSavings').value = s;
-  document.getElementById('lblNeeds').textContent = n + '%';
-  document.getElementById('lblWants').textContent = w + '%';
-  document.getElementById('lblSavings').textContent = s + '%';
+  document.getElementById('sliderNeeds').value = n; document.getElementById('sliderWants').value = w; document.getElementById('sliderSavings').value = s;
+  document.getElementById('lblNeeds').textContent = n + '%'; document.getElementById('lblWants').textContent = w + '%'; document.getElementById('lblSavings').textContent = s + '%';
   document.getElementById('sliderNeeds').style.setProperty('--val', n + '%');
   document.getElementById('sliderWants').style.setProperty('--val', w + '%');
   document.getElementById('sliderSavings').style.setProperty('--val', s + '%');
@@ -941,52 +1023,47 @@ function updateSliders(changed) {
 document.getElementById('calcInput').addEventListener('input', calculateRule);
 function calculateRule() {
   const val = parseFloat(document.getElementById('calcInput').value.replace(/\s/g, '').replace(',', '.')) || 0;
-  const nPct = parseInt(document.getElementById('sliderNeeds').value);
-  const wPct = parseInt(document.getElementById('sliderWants').value);
-  const sPct = parseInt(document.getElementById('sliderSavings').value);
-  const needs = (val * nPct) / 100;
-  const wants = (val * wPct) / 100;
-  const savings = (val * sPct) / 100;
+  const nPct = +document.getElementById('sliderNeeds').value, wPct = +document.getElementById('sliderWants').value, sPct = +document.getElementById('sliderSavings').value;
   document.getElementById('calcResults').innerHTML = `
-    <div style="display:flex; justify-content:space-between; padding:14px; background:var(--bg-light); border-radius:var(--radius-md); border-left:4px solid var(--blue);"><div style="font-weight:600;">Необходимое</div><div style="font-weight:700;">${fmt(needs)}</div></div>
-    <div style="display:flex; justify-content:space-between; padding:14px; background:var(--bg-light); border-radius:var(--radius-md); border-left:4px solid var(--orange);"><div style="font-weight:600;">Желания</div><div style="font-weight:700;">${fmt(wants)}</div></div>
-    <div style="display:flex; justify-content:space-between; padding:14px; background:var(--bg-light); border-radius:var(--radius-md); border-left:4px solid var(--green);"><div style="font-weight:600;">Сбережения</div><div style="font-weight:700;">${fmt(savings)}</div></div>`;
+    <div style="display:flex;justify-content:space-between;padding:14px;background:var(--bg-light);border-radius:var(--radius-md);border-left:4px solid var(--blue);"><div style="font-weight:600;">Необходимое</div><div style="font-weight:700;">${fmt(val * nPct / 100)}</div></div>
+    <div style="display:flex;justify-content:space-between;padding:14px;background:var(--bg-light);border-radius:var(--radius-md);border-left:4px solid var(--orange);"><div style="font-weight:600;">Желания</div><div style="font-weight:700;">${fmt(val * wPct / 100)}</div></div>
+    <div style="display:flex;justify-content:space-between;padding:14px;background:var(--bg-light);border-radius:var(--radius-md);border-left:4px solid var(--green);"><div style="font-weight:600;">Сбережения</div><div style="font-weight:700;">${fmt(val * sPct / 100)}</div></div>`;
 }
+
 function renderGoals() {
   const list = document.getElementById('goalsList');
   const empty = document.getElementById('goalsEmpty');
   if (!state.goals.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-  list.innerHTML = state.goals.map(g => {
+  list.innerHTML = state.goals.map((g, i) => {
     const pct = Math.min(100, Math.round((g.current / g.target) * 100));
-    return `<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-weight:700;font-size:15px;">${g.name}</div><button onclick="deleteGoal('${g.id}')" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;">×</button></div><div class="goal-progress"><div class="goal-fill" style="width:${pct}%;background:${g.color || 'var(--blue)'}"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);"><span>${fmt(g.current)} / ${fmt(g.target)}</span><span>${pct}%</span></div><button onclick="addToGoal('${g.id}')" style="margin-top:10px;width:100%;padding:10px;border:none;border-radius:10px;background:var(--bg-light);font-weight:600;font-size:13px;cursor:pointer;color:var(--text-main);">+ Пополнить</button></div>`;
+    return `<div class="goal-card" style="animation-delay:${i*.06}s">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-weight:700;font-size:15px;">${g.name}</div>
+      <button onclick="deleteGoal('${g.id}')" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;">×</button></div>
+      <div class="goal-progress"><div class="goal-fill" style="width:${pct}%;background:${g.color || 'var(--blue)'}"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);"><span>${fmt(g.current)} / ${fmt(g.target)}</span><span>${pct}%</span></div>
+      <button onclick="addToGoal('${g.id}')" style="margin-top:10px;width:100%;padding:10px;border:none;border-radius:10px;background:var(--bg-light);font-weight:600;font-size:13px;cursor:pointer;color:var(--text-main);">+ Пополнить</button>
+    </div>`;
   }).join('');
 }
 function openGoalModal() {
-  document.getElementById('goalName').value = '';
-  document.getElementById('goalTarget').value = '';
-  document.getElementById('goalCurrent').value = '';
-  document.getElementById('goalOverlay').classList.add('active');
-  document.getElementById('goalSheet').classList.add('active');
+  document.getElementById('goalName').value = ''; document.getElementById('goalTarget').value = ''; document.getElementById('goalCurrent').value = '';
+  document.getElementById('goalOverlay').classList.add('active'); document.getElementById('goalSheet').classList.add('active');
 }
 function closeGoalModal() {
-  document.getElementById('goalOverlay').classList.remove('active');
-  document.getElementById('goalSheet').classList.remove('active');
+  document.getElementById('goalOverlay').classList.remove('active'); document.getElementById('goalSheet').classList.remove('active');
 }
 function submitGoal() {
   const name = document.getElementById('goalName').value.trim();
   const target = parseFloat(document.getElementById('goalTarget').value.replace(/\s/g, '').replace(',', '.'));
   const current = parseFloat(document.getElementById('goalCurrent').value.replace(/\s/g, '').replace(',', '.')) || 0;
   if (!name || !target || target <= 0) { toast('Заполните название и сумму'); return; }
-  const colors = ['#0A84FF', '#BF5AF2', '#34C759', '#FF9F0A', '#FF375F'];
+  const colors = ['#0A84FF','#BF5AF2','#30D158','#FF9F0A','#FF375F'];
   state.goals.push({ id: 'g' + Date.now(), name, target, current, color: colors[state.goals.length % colors.length] });
-  saveState(); closeGoalModal(); renderGoals(); haptic('success'); toast('Цель создана');
+  saveState(); closeGoalModal(); renderGoals(); haptic('success'); toast('Цель создана'); confetti();
 }
 function deleteGoal(id) {
-  if (confirm('Удалить цель?')) {
-    state.goals = state.goals.filter(g => g.id !== id);
-    saveState(); renderGoals(); toast('Цель удалена');
-  }
+  if (confirm('Удалить цель?')) { state.goals = state.goals.filter(g => g.id !== id); saveState(); renderGoals(); toast('Цель удалена'); }
 }
 function addToGoal(id) {
   const val = prompt('Сколько добавить?');
@@ -994,38 +1071,36 @@ function addToGoal(id) {
   const num = parseFloat(val.replace(/\s/g, '').replace(',', '.'));
   if (isNaN(num) || num <= 0) return;
   const g = state.goals.find(x => x.id === id);
-  if (g) { g.current += num; saveState(); renderGoals(); haptic('success'); toast('Пополнено'); }
+  if (g) {
+    g.current += num; saveState(); renderGoals(); haptic('success'); toast('Пополнено');
+    if (g.current >= g.target) confetti();
+  }
 }
+
 function updateAvatarUI() {
-  const img = document.getElementById('headerAvatarImg');
-  const icon = document.getElementById('headerAvatarIcon');
-  const pImg = document.getElementById('profileAvatarImg');
-  const pIcon = document.getElementById('profileAvatarIcon');
+  const img = document.getElementById('headerAvatarImg'), icon = document.getElementById('headerAvatarIcon');
+  const pImg = document.getElementById('profileAvatarImg'), pIcon = document.getElementById('profileAvatarIcon');
   if (state.user.avatar) {
-    img.src = state.user.avatar; img.style.display = 'block';
-    pImg.src = state.user.avatar; pImg.style.display = 'block';
+    img.src = state.user.avatar; img.style.display = 'block'; pImg.src = state.user.avatar; pImg.style.display = 'block';
     icon.style.display = 'none'; pIcon.style.display = 'none';
   } else {
-    img.style.display = 'none'; pImg.style.display = 'none';
-    icon.style.display = 'flex'; pIcon.style.display = 'flex';
+    img.style.display = 'none'; pImg.style.display = 'none'; icon.style.display = 'flex'; pIcon.style.display = 'flex';
   }
   document.getElementById('profileName').textContent = state.user.name;
   document.getElementById('profileId').textContent = state.user.id !== 'local' ? `TG ID: ${state.user.id}` : 'Локальный профиль';
 }
 function handleAvatarUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      let width = img.width, height = img.height;
-      if (width > height) { if (width > 256) { height *= 256 / width; width = 256; } }
-      else { if (height > 256) { width *= 256 / height; height = 256; } }
-      canvas.width = width; canvas.height = height;
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      state.user.avatar = canvas.toDataURL('image/jpeg', 0.85);
+      let w = img.width, h = img.height;
+      if (w > h) { if (w > 256) { h *= 256 / w; w = 256; } } else { if (h > 256) { w *= 256 / h; h = 256; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      state.user.avatar = canvas.toDataURL('image/jpeg', .85);
       saveState(); updateAvatarUI(); toast('Аватар обновлён');
     };
     img.src = e.target.result;
@@ -1036,12 +1111,13 @@ function editName() {
   const newName = prompt('Ваше имя:', state.user.name);
   if (newName && newName.trim()) { state.user.name = newName.trim(); saveState(); updateAvatarUI(); toast('Имя изменено'); }
 }
-let currentType = 'expense';
-let currentCat = 'food';
+
+let currentType = 'expense', currentCat = 'food';
 function openAddModal(type) {
   currentType = type; setFormType(type);
   document.getElementById('amountInput').value = '';
   document.getElementById('noteInput').value = '';
+  document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
   document.getElementById('addOverlay').classList.add('active');
   document.getElementById('addSheet').classList.add('active');
   setTimeout(() => document.getElementById('amountInput').focus(), 280);
@@ -1054,8 +1130,7 @@ function closeAddModal() {
 }
 function setFormType(type) {
   currentType = type;
-  const btnExp = document.getElementById('btnTypeExpense');
-  const btnInc = document.getElementById('btnTypeIncome');
+  const btnExp = document.getElementById('btnTypeExpense'), btnInc = document.getElementById('btnTypeIncome');
   if (type === 'expense') {
     btnExp.style.background = 'var(--dark-bg)'; btnExp.style.color = '#fff';
     btnInc.style.background = 'var(--bg-light)'; btnInc.style.color = 'var(--text-muted)';
@@ -1073,12 +1148,16 @@ function renderCategorySelector() {
   if (!available.find(c => c.id === currentCat)) currentCat = available[0].id;
   grid.innerHTML = available.map(cat => `
     <div class="cat-item ${cat.id === currentCat ? 'active' : ''}" onclick="selectCat('${cat.id}')">
-      <div class="icon">${SVG_ICONS[cat.id] || SVG_ICONS.other}</div>
-      <span>${cat.name}</span>
-    </div>
-  `).join('');
+      <div class="icon">${SVG_ICONS[cat.id] || SVG_ICONS.other}</div><span>${cat.name}</span>
+    </div>`).join('');
 }
 function selectCat(id) { currentCat = id; renderCategorySelector(); haptic('light'); }
+function setQuick(n) {
+  const input = document.getElementById('amountInput');
+  const cur = parseFloat(input.value.replace(/\s/g, '').replace(',', '.')) || 0;
+  input.value = cur + n;
+  haptic('light');
+}
 function submitTransaction() {
   const input = document.getElementById('amountInput');
   const val = parseFloat(input.value.replace(/\s/g, '').replace(',', '.'));
@@ -1088,60 +1167,58 @@ function submitTransaction() {
     haptic('error'); return;
   }
   const note = document.getElementById('noteInput').value.trim();
+  const dateVal = document.getElementById('dateInput').value;
+  const date = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
   state.transactions.push({
-    id: Date.now().toString(), type: currentType, amount: val, category: currentCat, note,
-    date: new Date().toISOString(), wallet: state.wallets[state.currentWallet]?.id || 'main'
+    id: Date.now().toString(), type: currentType, amount: val, category: currentCat, note, date,
+    wallet: state.wallets[state.currentWallet]?.id || 'main'
   });
   saveState(); closeAddModal(); renderHome(); haptic('success');
   toast(currentType === 'income' ? 'Доход добавлен' : 'Расход добавлен');
 }
+
 function exportData() {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `lunetra-${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); toast('JSON скачан');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `lunetra-${new Date().toISOString().slice(0,10)}.json`; a.click(); toast('JSON скачан');
 }
 function exportCSV() {
   const rows = [['id','type','amount','category','note','date','wallet']];
-  state.transactions.forEach(t => {
-    rows.push([t.id, t.type, t.amount, t.category, (t.note || '').replace(/,/g,';'), t.date, t.wallet || '']);
-  });
+  state.transactions.forEach(t => rows.push([t.id, t.type, t.amount, t.category, (t.note || '').replace(/,/g,';'), t.date, t.wallet || '']));
   const csv = rows.map(r => r.join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `lunetra-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click(); toast('CSV скачан');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `lunetra-${new Date().toISOString().slice(0,10)}.csv`; a.click(); toast('CSV скачан');
 }
 function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
       if (data.transactions && Array.isArray(data.transactions)) {
         if (confirm('Заменить текущие данные импортом?')) {
-          state = { ...defaultState, ...data };
-          saveState(); renderHome(); applyTheme(); toast('Данные импортированы'); haptic('success');
+          state = { ...defaultState, ...data }; saveState(); renderHome(); applyTheme();
+          toast('Данные импортированы'); haptic('success');
         }
-      } else toast('Неверный формат файла');
-    } catch { toast('Ошибка чтения файла'); }
+      } else toast('Неверный формат');
+    } catch { toast('Ошибка чтения'); }
   };
-  reader.readAsText(file);
-  event.target.value = '';
+  reader.readAsText(file); event.target.value = '';
 }
 function clearHistory() {
   if (confirm('Удалить все транзакции? Это нельзя отменить.')) {
-    state.transactions = []; saveState(); renderHome(); switchView('home'); toast('История очищена');
+    state.transactions = []; state.lastDeleted = null; saveState(); renderHome(); switchView('home'); toast('История очищена');
   }
 }
+
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
+
+/* Boot */
+checkSubscribe();
 applyTheme();
-document.getElementById('hapticSwitch').classList.toggle('on', state.haptic);
 renderHome();
 updateSliders('needs');
 </script>
