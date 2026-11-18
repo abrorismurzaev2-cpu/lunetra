@@ -1,0 +1,20 @@
+{
+  "name": "Lunetra",
+  "short_name": "Lunetra",
+  "description": "Приватный современный трекер финансов",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0F0F12",
+  "theme_color": "#0F0F12",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "lang": "ru"
+}
