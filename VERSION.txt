@@ -1,0 +1,3 @@
+1.2.0
+Empty start, subscribe modal (t.me/lunetra0 once), more animations, hide balance, quick amounts, undo delete, streak, confetti.
+Updated: 2026-11-18
