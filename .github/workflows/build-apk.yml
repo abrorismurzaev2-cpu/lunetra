@@ -1,0 +1,151 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'manifest.json'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Create TWA project
+        run: |
+          mkdir -p twa
+          cd twa
+          # Non-interactive init via manifest
+          bubblewrap init \
+            --manifest https://abrorismurzaev2-cpu.github.io/lunetra/manifest.json \
+            --directory . \
+            --packageId app.lunetra.finance \
+            --name "Lunetra" \
+            --launcherName "Lunetra" \
+            --display standalone \
+            --themeColor "#0B0B0E" \
+            --navigationColor "#0B0B0E" \
+            --backgroundColor "#0B0B0E" \
+            --startUrl "/lunetra/" \
+            --iconUrl https://abrorismurzaev2-cpu.github.io/lunetra/icons/icon-512.png \
+            --maskableIconUrl https://abrorismurzaev2-cpu.github.io/lunetra/icons/icon-512.png \
+            --appVersionName "1.2.0" \
+            --appVersionCode 12 \
+            --signingKeyPath ./android.keystore \
+            --signingKeyAlias lunetra \
+            --keyPassword lunetra123 \
+            --keystorePassword lunetra123 \
+            || true
+          # Fallback: generate keystore and twa-manifest manually if init failed partially
+          if [ ! -f twa-manifest.json ]; then
+            cat > twa-manifest.json << 'EOF'
+          {
+            "packageId": "app.lunetra.finance",
+            "host": "abrorismurzaev2-cpu.github.io",
+            "name": "Lunetra",
+            "launcherName": "Lunetra",
+            "display": "standalone",
+            "themeColor": "#0B0B0E",
+            "navigationColor": "#0B0B0E",
+            "backgroundColor": "#0B0B0E",
+            "enableNotifications": false,
+            "startUrl": "/lunetra/",
+            "iconUrl": "https://abrorismurzaev2-cpu.github.io/lunetra/icons/icon-512.png",
+            "maskableIconUrl": "https://abrorismurzaev2-cpu.github.io/lunetra/icons/icon-512.png",
+            "splashScreenFadeOutDuration": 300,
+            "signingKey": {
+              "path": "./android.keystore",
+              "alias": "lunetra"
+            },
+            "appVersionName": "1.2.0",
+            "appVersionCode": 12,
+            "shortcuts": [],
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "https://abrorismurzaev2-cpu.github.io/lunetra/manifest.json",
+            "fallbackType": "customtabs",
+            "features": {},
+            "alphaDependencies": {"enabled": false},
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false,
+            "isMetaQuest": false,
+            "fullScopeUrl": "https://abrorismurzaev2-cpu.github.io/lunetra/",
+            "minSdkVersion": 21,
+            "orientation": "portrait",
+            "fingerprints": []
+          }
+          EOF
+          fi
+
+      - name: Generate keystore if missing
+        run: |
+          cd twa
+          if [ ! -f android.keystore ]; then
+            keytool -genkeypair -v -keystore android.keystore -alias lunetra \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass lunetra123 -keypass lunetra123 \
+              -dname "CN=Lunetra, OU=Mobile, O=Lunetra, L=City, ST=State, C=RU"
+          fi
+
+      - name: Build APK
+        run: |
+          cd twa
+          # Accept licenses non-interactively
+          yes | bubblewrap update || true
+          echo "lunetra123" | bubblewrap build --skipPwaValidation || bubblewrap build --skipPwaValidation
+
+      - name: Find APK
+        id: find
+        run: |
+          find twa -name "*.apk" -type f 2>/dev/null | head -5
+          APK=$(find twa -name "app-release-signed.apk" -o -name "*-signed.apk" -o -name "*.apk" 2>/dev/null | head -1)
+          echo "apk=$APK" >> $GITHUB_OUTPUT
+          ls -la twa/ || true
+          ls -la twa/app/build/outputs/apk/release/ 2>/dev/null || true
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lunetra-apk
+          path: |
+            twa/**/*.apk
+            twa/app/build/outputs/**/*.apk
+          if-no-files-found: warn
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: success()
+        with:
+          tag_name: v1.2.0-apk
+          name: Lunetra v1.2.0 APK
+          body: |
+            ## Lunetra Android APK
+            Package: `app.lunetra.finance`
+            Version: 1.2.0
+            
+            Скачайте APK из Assets ниже.
+            Для RuStore загрузите этот файл в консоль.
+          files: |
+            twa/**/*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
