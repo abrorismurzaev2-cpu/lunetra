@@ -17,23 +17,63 @@
 <style>
 
 :root {
-  --bg-light: #F2F2F7; --card-bg: #FFFFFF; --dark-bg: #0B0B0E; --dark-surface: #1A1A1E;
-  --text-main: #1D1D1F; --text-muted: #8E8E93; --text-light: #FFFFFF;
-  --text-light-muted: rgba(255,255,255,0.62);
-  --green: #30D158; --red: #FF453A; --blue: #0A84FF; --orange: #FF9F0A;
-  --purple: #BF5AF2; --teal: #64D2FF; --pink: #FF375F;
-  --radius-xl: 36px; --radius-lg: 24px; --radius-md: 16px; --radius-sm: 12px; --radius-pill: 99px;
+  --bg-page: #F2F2F7;
+  --bg-light: #EBEBF0;
+  --card-bg: rgba(255,255,255,0.82);
+  --card-solid: #FFFFFF;
+  --dark-bg: #0B0B0E;
+  --dark-surface: #1A1A1E;
+  --text-main: #1D1D1F;
+  --text-muted: #6C6C70;
+  --text-light: #FFFFFF;
+  --text-light-muted: rgba(255,255,255,0.65);
+  --btn-bg: #0B0B0E;
+  --btn-text: #FFFFFF;
+  --btn-ghost-bg: rgba(0,0,0,0.06);
+  --btn-ghost-text: #1D1D1F;
+  --btn-outline-border: rgba(0,0,0,0.14);
+  --green: #248A3D; --red: #D70015; --blue: #0071E3; --orange: #C93400;
+  --purple: #8944AB; --teal: #0088A3; --pink: #D30F45;
+  --accent: #0071E3;
+  --radius-xl: 28px; --radius-lg: 22px; --radius-md: 16px; --radius-sm: 12px; --radius-pill: 99px;
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1); --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.06); --shadow-float: 0 16px 48px rgba(0,0,0,0.22);
+  --shadow-card: 0 8px 32px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.6) inset;
+  --shadow-float: 0 16px 48px rgba(0,0,0,0.22);
+  --shadow-btn: 0 4px 14px rgba(0,0,0,0.18);
+  --glass: blur(16px) saturate(1.4);
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  --chat-user: #0071E3;
+  --chat-bot-bg: rgba(0,0,0,0.06);
+  --chat-pattern: rgba(0,0,0,0.03);
 }
 [data-theme="dark"] {
-  --bg-light: #000; --card-bg: #1C1C1E; --text-main: #F5F5F7; --text-muted: #98989F;
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+  --bg-page: #000000;
+  --bg-light: #1C1C1E;
+  --card-bg: rgba(28,28,30,0.88);
+  --card-solid: #1C1C1E;
+  --dark-bg: #FFFFFF;
+  --dark-surface: #2C2C2E;
+  --text-main: #F5F5F7;
+  --text-muted: #A1A1A6;
+  --text-light: #0B0B0E;
+  --text-light-muted: rgba(0,0,0,0.55);
+  --btn-bg: #FFFFFF;
+  --btn-text: #0B0B0E;
+  --btn-ghost-bg: rgba(255,255,255,0.12);
+  --btn-ghost-text: #F5F5F7;
+  --btn-outline-border: rgba(255,255,255,0.22);
+  --green: #30D158; --red: #FF453A; --blue: #0A84FF; --orange: #FF9F0A;
+  --purple: #BF5AF2; --teal: #64D2FF; --pink: #FF375F;
+  --accent: #0A84FF;
+  --shadow-card: 0 8px 32px rgba(0,0,0,0.45);
+  --shadow-btn: 0 4px 16px rgba(0,0,0,0.4);
+  --chat-user: #0A84FF;
+  --chat-bot-bg: rgba(255,255,255,0.1);
+  --chat-pattern: rgba(255,255,255,0.04);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 body {
-  background: var(--bg-light); color: var(--text-main); font-family: var(--font);
+  background: var(--bg-page); color: var(--text-main); font-family: var(--font);
   min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased;
   padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); transition: background .4s ease, color .4s ease;
 }
@@ -548,6 +588,210 @@ body.modal-open .floating-nav {
 }
 .wallet-chip.active { background: var(--dark-bg); color: #fff; }
 
+
+/* Contrast-safe buttons */
+.btn-primary {
+  background: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+  box-shadow: var(--shadow-btn);
+  position: relative; overflow: hidden;
+}
+.btn-primary:active { transform: scale(.96); }
+button, .chip, .tool-btn, .nav-btn, .action-pill, .action-main, .wallet-chip, .template-chip, .quick-chip {
+  position: relative; overflow: hidden;
+}
+.btn-ghost, .section-action {
+  background: var(--btn-ghost-bg) !important;
+  color: var(--btn-ghost-text) !important;
+  border: none;
+}
+.settings-row button, .profile-header button {
+  color: var(--text-main) !important;
+}
+.settings-row span { color: var(--text-main); }
+.tool-btn {
+  background: var(--card-bg) !important;
+  color: var(--text-main) !important;
+  backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+  border: 1px solid var(--btn-outline-border);
+  box-shadow: var(--shadow-card);
+}
+.tool-btn .t-title { color: var(--text-main) !important; }
+.tool-btn .t-desc { color: var(--text-muted) !important; }
+.wallet-chip {
+  background: var(--btn-ghost-bg) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--btn-outline-border);
+}
+.wallet-chip.active {
+  background: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+}
+.chip {
+  background: var(--btn-ghost-bg) !important;
+  color: var(--text-main) !important;
+}
+.chip.active {
+  background: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+}
+.item-card, .stat-mini, .budget-card, .goal-card, .settings-row, .search-box, .search-bar {
+  background: var(--card-bg) !important;
+  backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+  border: 1px solid var(--btn-outline-border);
+  color: var(--text-main);
+}
+.item-name, .section-title, .profile-name, .sm-value { color: var(--text-main) !important; }
+.item-desc, .sm-label, .profile-id, .t-desc { color: var(--text-muted) !important; }
+.native-dialog { background: var(--card-solid) !important; color: var(--text-main); }
+.native-dialog input {
+  background: var(--bg-light) !important;
+  color: var(--text-main) !important;
+}
+.btn-dialog-cancel {
+  background: var(--btn-ghost-bg) !important;
+  color: var(--btn-ghost-text) !important;
+}
+.btn-dialog-ok {
+  background: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+}
+.floating-nav {
+  background: var(--dark-bg) !important;
+  border: 1px solid var(--btn-outline-border);
+}
+[data-theme="dark"] .floating-nav {
+  background: #1C1C1E !important;
+  border-color: rgba(255,255,255,0.12);
+}
+[data-theme="dark"] .nav-btn { color: rgba(255,255,255,0.45); }
+[data-theme="dark"] .nav-btn.active { color: #fff; background: rgba(255,255,255,0.14); }
+[data-theme="light"] .floating-nav, :root .floating-nav {
+  background: #0B0B0E !important;
+}
+:root .nav-btn { color: rgba(255,255,255,0.5); }
+:root .nav-btn.active { color: #fff; background: rgba(255,255,255,0.14); }
+/* Ripple */
+.ripple-ink {
+  position: absolute; border-radius: 50%; transform: scale(0);
+  animation: ripple .5s linear; background: rgba(255,255,255,0.35); pointer-events: none;
+}
+[data-theme="light"] .btn-ghost .ripple-ink, .tool-btn .ripple-ink {
+  background: rgba(0,0,0,0.12);
+}
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+/* Daily budget widget */
+.daily-budget-widget {
+  background: linear-gradient(135deg, rgba(10,132,255,0.14), rgba(191,90,242,0.12));
+  border: 1px solid var(--btn-outline-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px; margin-bottom: 14px;
+  box-shadow: var(--shadow-card);
+}
+.daily-budget-widget .db-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.daily-budget-widget .db-value { font-size: 26px; font-weight: 800; color: var(--text-main); letter-spacing: -.5px; margin-top: 4px; }
+.daily-budget-widget .db-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.35; }
+/* Chat */
+.view-assistant {
+  display: flex; flex-direction: column; height: calc(100vh - 120px);
+  max-height: 720px;
+}
+.chat-bg {
+  flex: 1; overflow-y: auto; padding: 16px 14px 100px;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(10,132,255,0.08), transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(191,90,242,0.08), transparent 45%),
+    linear-gradient(180deg, var(--bg-page), var(--bg-light));
+  background-attachment: local;
+  position: relative;
+}
+.chat-bg::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(var(--chat-pattern) 1px, transparent 1px),
+    linear-gradient(90deg, var(--chat-pattern) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.chat-msgs { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; }
+.msg {
+  max-width: 88%; padding: 12px 14px; border-radius: 18px; font-size: 14px; line-height: 1.45;
+  animation: msgIn .45s var(--spring) both; word-break: break-word;
+}
+.msg-bot {
+  align-self: flex-start;
+  background: var(--chat-bot-bg);
+  color: var(--text-main);
+  border-bottom-left-radius: 6px;
+  backdrop-filter: blur(8px);
+}
+.msg-user {
+  align-self: flex-end;
+  background: var(--chat-user);
+  color: #fff;
+  border-bottom-right-radius: 6px;
+  box-shadow: 0 6px 20px rgba(10,132,255,0.25);
+}
+.msg-quick {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+}
+.msg-quick button {
+  border: 1px solid var(--btn-outline-border);
+  background: var(--card-solid);
+  color: var(--text-main);
+  padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  font-family: var(--font); cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+.msg-quick button:active { transform: scale(.95); }
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(16px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.typing {
+  align-self: flex-start; display: flex; gap: 5px; padding: 14px 16px;
+  background: var(--chat-bot-bg); border-radius: 18px; border-bottom-left-radius: 6px;
+}
+.typing span {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted);
+  animation: typingDot 1.2s ease-in-out infinite;
+}
+.typing span:nth-child(2) { animation-delay: .15s; }
+.typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes typingDot {
+  0%, 60%, 100% { transform: translateY(0); opacity: .4; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+.chat-input-bar {
+  position: sticky; bottom: 0; padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+  background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+  border-top: 1px solid var(--btn-outline-border);
+  display: flex; gap: 8px; z-index: 5;
+}
+.chat-input-bar input {
+  flex: 1; border: none; background: var(--bg-light); border-radius: 22px;
+  padding: 12px 16px; font-size: 15px; font-family: var(--font); color: var(--text-main); outline: none;
+}
+.chat-send {
+  width: 46px; height: 46px; border-radius: 50%; border: none;
+  background: var(--btn-bg); color: var(--btn-text); display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-btn); cursor: pointer;
+}
+.fab-assistant {
+  position: fixed; right: 18px; bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  width: 56px; height: 56px; border-radius: 50%; border: none;
+  background: linear-gradient(135deg, #0A84FF, #BF5AF2); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 28px rgba(10,132,255,0.45); z-index: 80; cursor: pointer;
+  animation: fabPulse 2.4s ease-in-out infinite;
+}
+.fab-assistant svg { width: 26px; height: 26px; }
+@keyframes fabPulse {
+  0%, 100% { box-shadow: 0 8px 28px rgba(10,132,255,0.4); transform: scale(1); }
+  50% { box-shadow: 0 8px 36px rgba(191,90,242,0.55); transform: scale(1.04); }
+}
+body.modal-open .fab-assistant { opacity: 0; pointer-events: none; }
+
 </style>
 </head>
 <body>
@@ -609,6 +853,12 @@ body.modal-open .floating-nav {
 
 <div class="content-area">
   <main class="view active" id="view-home">
+    <div class="daily-budget-widget" id="dailyBudgetWidget">
+      <div class="db-label">Можно потратить сегодня</div>
+      <div class="db-value" id="dailyBudgetValue">—</div>
+      <div class="db-hint" id="dailyBudgetHint">Установите месячный бюджет в профиле</div>
+    </div>
+
     <div class="wallet-chip-row" id="walletChips"></div>
 
     <div class="insight-strip" id="insightStrip">Добро пожаловать в Lunetra ✨</div>
@@ -719,6 +969,19 @@ body.modal-open .floating-nav {
   <main class="view" id="view-business">
     <div class="section-head"><h2 class="section-title">Бизнес</h2></div>
     <div id="businessPanel"></div>
+  </main>
+
+  <main class="view" id="view-assistant">
+    <div class="section-head"><h2 class="section-title">Помощник</h2></div>
+    <div class="view-assistant">
+      <div class="chat-bg"><div class="chat-msgs" id="chatMsgs"></div></div>
+      <div class="chat-input-bar">
+        <input type="text" id="chatInput" placeholder="Спросите про траты, цели, налоги…" onkeydown="if(event.key==='Enter')sendChat()">
+        <button type="button" class="chat-send" onclick="sendChat()" aria-label="Отправить">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9 22 2z"/></svg>
+        </button>
+      </div>
+    </div>
   </main>
 
   <main class="view" id="view-profile">
@@ -846,7 +1109,7 @@ body.modal-open .floating-nav {
     </div>
 
     <div style="text-align:center;margin-top:28px;font-size:12px;color:var(--text-muted);">
-      Lunetra v1.7 · UX · CRUD · Multi-balance · Приватный трекер<br>Данные только на вашем устройстве
+      Lunetra v1.8 · Assistant · Glass · Theme-safe · Приватный трекер<br>Данные только на вашем устройстве
     </div>
   </main>
 </div>
@@ -869,6 +1132,7 @@ body.modal-open .floating-nav {
   <button class="nav-btn active" data-view="home" onclick="switchView('home')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div></button>
   <button class="nav-btn" data-view="analytics" onclick="switchView('analytics')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div></button>
   <button class="nav-btn" data-view="goals" onclick="switchView('goals')"><div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div></button>
+  <button class="nav-btn" data-view="assistant" onclick="switchView('assistant')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div></button>
   <button class="nav-btn" data-view="business" onclick="switchView('business')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div></button>
   <button class="nav-btn" data-view="calculator" onclick="switchView('calculator')"><div class="icon"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="8" y1="14" x2="8" y2="14.01"/></svg></div></button>
   <button class="nav-btn" data-view="profile" onclick="switchView('profile')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></button>
@@ -1161,6 +1425,7 @@ function switchView(viewName) {
   if (viewName === 'home') renderHome();
   if (viewName === 'profile') { try { refreshSmartStats(); renderWalletsUI(); updateProUI(); } catch(e) {} }
   if (viewName === 'business') { try { renderBusinessUI(); } catch(e) {} }
+  if (viewName === 'assistant') { try { initAssistant(); } catch(e) {} }
   if (viewName === 'profile') updateStreakUI();
 }
 
@@ -1282,6 +1547,7 @@ function renderHome() {
   const wn = document.getElementById('walletName');
   if (wn) wn.textContent = state.wallets[state.currentWallet]?.name || 'Счёт';
   try { renderWalletChips(); } catch (e) {}
+  try { renderDailyBudget(); } catch (e) {}
 
   const bFill = document.getElementById('budgetFill');
   const bText = document.getElementById('budgetText');
@@ -2767,6 +3033,190 @@ function renderWalletChips() {
   }).join('');
 }
 
+
+/* —— Smart Assistant (template bot) —— */
+function monthExpenseByCat() {
+  var now = new Date();
+  var map = {};
+  (state.transactions || []).forEach(function(t) {
+    if (t.type !== 'expense') return;
+    var d = new Date(t.date);
+    if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return;
+    map[t.category] = (map[t.category] || 0) + Number(t.amount || 0);
+  });
+  var top = Object.keys(map).map(function(k){ return { id: k, amount: map[k] }; }).sort(function(a,b){ return b.amount - a.amount; })[0];
+  return top;
+}
+function assistantReply(text) {
+  var q = (text || '').toLowerCase().trim();
+  if (!q) return { text: 'Напишите вопрос или выберите кнопку ниже.', quick: ['Мои траты', 'Как копить', 'Налоги', 'Баланс'] };
+  if (/трат|расход|потрат|куда|категор/.test(q) || q === 'мои траты') {
+    var top = monthExpenseByCat();
+    if (!top) return { text: 'Пока нет расходов в этом месяце. Добавьте операции на главном экране — и я разберу, куда уходят деньги.', quick: ['Как копить', 'Баланс'] };
+    var cat = getCat(top.id);
+    var save = Math.round(top.amount * 0.15);
+    return {
+      text: 'За этот месяц ты потратил больше всего на «' + cat.name + '». Сумма: ' + fmt(top.amount) + '. Рекомендую сократить эту статью на 15% — это около ' + fmt(save) + ' экономии в месяц.',
+      quick: ['Как копить', 'Налоги', 'Баланс']
+    };
+  }
+  if (/копить|накоп|сбереж|50\/30|цель/.test(q) || q === 'как копить') {
+    return {
+      text: 'Правило 50/30/20:\n• 50% — необходимое (жильё, еда, транспорт)\n• 30% — желания\n• 20% — сбережения и цели\n\nВ Lunetra откройте «Распределение» или создайте цель и пополняйте её регулярно. Даже 10% от дохода уже меняют картину за год.',
+      quick: ['Мои траты', 'Цели', 'Баланс']
+    };
+  }
+  if (/налог|нпд|усн|самозан/.test(q) || q === 'налоги') {
+    var biz = (state.businessTx || []).filter(function(t){ return t.type === 'income'; });
+    var inc = biz.reduce(function(s,t){ return s + Number(t.amount||0); }, 0);
+    if (inc > 0) {
+      return {
+        text: 'По вашим бизнес-доходам ' + fmt(inc) + ':\n• УСН 6%: отложить ' + fmt(inc * 0.06) + '\n• НПД 4%: ' + fmt(inc * 0.04) + '\n• НПД 6%: ' + fmt(inc * 0.06) + '\n\nЭто ориентир, не налоговая консультация. Точный расчёт — в разделе «Бизнес».',
+        quick: ['Мои траты', 'Бизнес']
+      };
+    }
+    return {
+      text: 'Пока нет бизнес-доходов в разделе «Бизнес». Когда добавите — посчитаю УСН 6% и НПД 4/6%.\n\nОриентир с любой суммы X:\nУСН 6% = 0.06·X · НПД 4% = 0.04·X.',
+      quick: ['Мои траты', 'Как копить']
+    };
+  }
+  if (/баланс|сколько|остал/.test(q) || q === 'баланс') {
+    var wid = typeof currentWalletId === 'function' ? currentWalletId() : 'main';
+    var bal = typeof walletBalanceOf === 'function' ? walletBalanceOf(wid) : 0;
+    var total = typeof totalBalanceAllWallets === 'function' ? totalBalanceAllWallets() : bal;
+    return {
+      text: 'Текущий счёт: ' + fmt(bal) + '\nВсе счета: ' + fmt(total) + (state.budget ? '\nМесячный бюджет: ' + fmt(state.budget) : ''),
+      quick: ['Мои траты', 'Как копить']
+    };
+  }
+  if (/про|подписк|тариф/.test(q)) {
+    return {
+      text: 'Lunetra Pro: счета и цели без лимита, Excel, бизнес-P&L, аналитика.\n• Trial 7 дней\n• 199 ₽/мес\n• 1490 ₽/год\nОформить можно в Профиле.',
+      quick: ['Мои траты', 'Баланс']
+    };
+  }
+  if (/цел/.test(q) || q === 'цели') {
+    var g = (state.goals || [])[0];
+    if (!g) return { text: 'Целей пока нет. Создайте первую в разделе «Цели» — на Free доступна 1 активная цель.', quick: ['Как копить', 'Мои траты'] };
+    var left = Math.max(0, (g.target||0) - (g.current||0));
+    return { text: 'Ближайшая цель «' + g.name + '»: ' + fmt(g.current||0) + ' из ' + fmt(g.target) + '. Осталось ' + fmt(left) + '.', quick: ['Как копить', 'Мои траты'] };
+  }
+  if (/бизнес/.test(q)) {
+    return { text: 'В разделе «Бизнес» (Pro): доходы/расходы, чистая прибыль, ROI/маржа и налоговый помощник.', quick: ['Налоги', 'Мои траты'] };
+  }
+  return {
+    text: 'Я понимаю запросы про траты, накопления, налоги, баланс и цели. Выберите кнопку или напишите, например: «куда уходят деньги».',
+    quick: ['Мои траты', 'Как копить', 'Налоги', 'Баланс']
+  };
+}
+function appendChatMsg(role, text, quick) {
+  var box = document.getElementById('chatMsgs');
+  if (!box) return;
+  var div = document.createElement('div');
+  div.className = 'msg msg-' + (role === 'user' ? 'user' : 'bot');
+  div.textContent = text;
+  if (quick && quick.length) {
+    var q = document.createElement('div');
+    q.className = 'msg-quick';
+    quick.forEach(function(label) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.onclick = function() { sendChatPreset(label); };
+      q.appendChild(b);
+    });
+    div.appendChild(q);
+  }
+  box.appendChild(div);
+  box.parentElement.scrollTop = box.parentElement.scrollHeight;
+}
+function showTyping() {
+  var box = document.getElementById('chatMsgs');
+  if (!box) return null;
+  var t = document.createElement('div');
+  t.className = 'typing';
+  t.id = 'typingInd';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  box.appendChild(t);
+  box.parentElement.scrollTop = box.parentElement.scrollHeight;
+  return t;
+}
+function hideTyping() {
+  var t = document.getElementById('typingInd');
+  if (t) t.remove();
+}
+function botRespond(userText) {
+  showTyping();
+  setTimeout(function() {
+    hideTyping();
+    var r = assistantReply(userText);
+    appendChatMsg('bot', r.text, r.quick);
+  }, 600 + Math.random() * 500);
+}
+function sendChatPreset(label) {
+  appendChatMsg('user', label);
+  if (label === 'Цели') { try { switchView('goals'); } catch(e) {} }
+  if (label === 'Бизнес') { try { switchView('business'); } catch(e) {} }
+  botRespond(label);
+}
+function sendChat() {
+  var input = document.getElementById('chatInput');
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendChatMsg('user', text);
+  botRespond(text);
+}
+function initAssistant() {
+  var box = document.getElementById('chatMsgs');
+  if (!box || box.dataset.ready) return;
+  box.dataset.ready = '1';
+  appendChatMsg('bot', 'Привет! Я твой финансовый ассистент. Чем помогу?', ['Мои траты', 'Как копить', 'Налоги', 'Баланс']);
+}
+function renderDailyBudget() {
+  var valEl = document.getElementById('dailyBudgetValue');
+  var hintEl = document.getElementById('dailyBudgetHint');
+  if (!valEl) return;
+  var budget = Number(state.budget || 0);
+  if (budget <= 0) {
+    valEl.textContent = '—';
+    if (hintEl) hintEl.textContent = 'Установите месячный бюджет в профиле';
+    return;
+  }
+  var now = new Date();
+  var spent = 0;
+  (state.transactions || []).forEach(function(t) {
+    if (t.type !== 'expense') return;
+    var d = new Date(t.date);
+    if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) spent += Number(t.amount || 0);
+  });
+  var daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  var daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
+  var left = budget - spent;
+  var perDay = left / daysLeft;
+  valEl.textContent = fmt(Math.max(0, perDay));
+  if (hintEl) {
+    if (left <= 0) hintEl.textContent = 'Лимит месяца исчерпан. Осталось дней: ' + daysLeft;
+    else hintEl.textContent = 'Остаток бюджета ' + fmt(left) + ' на ' + daysLeft + ' дн. · Потрачено ' + fmt(spent);
+  }
+}
+function initRipples() {
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('button, .chip, .tool-btn, .nav-btn, .action-main, .action-pill');
+    if (!btn) return;
+    var rect = btn.getBoundingClientRect();
+    var ink = document.createElement('span');
+    ink.className = 'ripple-ink';
+    var size = Math.max(rect.width, rect.height);
+    ink.style.width = ink.style.height = size + 'px';
+    ink.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ink.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(ink);
+    setTimeout(function() { ink.remove(); }, 500);
+  }, true);
+}
+
 /* Boot */
 function bootApp() {
   try { validateState(); } catch (e) {}
@@ -2788,6 +3238,8 @@ function bootApp() {
     var sp = document.getElementById('splash');
     if (sp) sp.classList.add('hide');
   }, 1500);
+  try { initRipples(); } catch(e) {}
+  try { renderDailyBudget(); } catch(e) {}
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootApp);
 else bootApp();
