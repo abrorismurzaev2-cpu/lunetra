@@ -2,8 +2,11 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F8F9FA">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lunetra — Liquid Glass · Animated</title>
+<title>Lunetra</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,22 +59,7 @@ ul{list-style:none;}
    СЦЕНА
    ============================================================ */
 html,body{height:100%;}
-body{
-  display:grid;
-  place-items:center;
-  overflow:hidden;
-
-  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  color:#fff;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-
-  background:
-    radial-gradient(900px 620px at 12% -5%, rgba(46,107,255,.24), transparent 62%),
-    radial-gradient(760px 520px at 88% 12%, rgba(0,229,138,.12), transparent 62%),
-    radial-gradient(820px 640px at 50% 108%, rgba(255,107,107,.12), transparent 62%),
-    #08090B;
-}
+body{background:#F8F9FA;margin:0;overflow:hidden;}
 
 /* ============================================================
    КОРПУС ТЕЛЕФОНА
@@ -1558,6 +1546,47 @@ body{
     transition-duration:.001ms !important;
   }
 }
+
+/* PRODUCT: full-screen app, no device chrome */
+html, body {
+  height: 100% !important;
+  height: 100dvh !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  background: var(--light-bg, #F8F9FA) !important;
+  display: block !important;
+  place-items: unset !important;
+}
+.phone {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  height: 100dvh !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  overflow: hidden !important;
+  background: var(--light-bg, #F8F9FA) !important;
+}
+@media (max-height:900px){ .phone{ transform: none !important; } }
+@media (max-height:780px){ .phone{ transform: none !important; } }
+@media (max-height:680px){ .phone{ transform: none !important; } }
+.statusbar { display: none !important; height: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; }
+.app {
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 1 !important;
+}
+.app.is-ready { opacity: 1 !important; }
+.top {
+  padding-top: max(12px, env(safe-area-inset-top)) !important;
+}
+.tabbar, .floating-nav {
+  padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+}
+
 </style>
 </head>
 
@@ -1639,7 +1668,7 @@ body{
         <div class="top">
 
           <div class="statusbar rise" style="--d:.05s">
-            <span>9:41</span>
+            <span></span>
             <span class="sb-right">
               <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true">
                 <rect x="0" y="7" width="3" height="4" rx="1"/>
@@ -1664,10 +1693,10 @@ body{
 
           <div class="appbar rise" style="--d:.10s">
             <div>
-              <div class="greet">Добрый вечер,</div>
-              <div class="name">Александра</div>
+              <div class="greet">Добро пожаловать</div>
+              <div class="name">Гость</div>
             </div>
-            <div class="avatar">А</div>
+            <div class="avatar">Л</div>
           </div>
 
           <div class="balance rise" style="--d:.16s">
@@ -1823,7 +1852,7 @@ body{
       <section class="view view--analytics" data-view="analytics">
         <div class="top">
           <div class="statusbar rise" style="--d:.05s">
-            <span>9:41</span>
+            <span></span>
             <span class="sb-right">
               <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
               <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M1.4 4.3a10 10 0 0 1 13.2 0"/><path d="M4 7.1a6.4 6.4 0 0 1 8 0"/><circle cx="8" cy="10.4" r="1.1" fill="currentColor" stroke="none"/></svg>
@@ -1978,7 +2007,7 @@ body{
 
           <div class="chat" id="chat">
             <div class="msg msg--bot" style="animation-delay:.1s">
-              Привет, Александра! 👋 Я вижу, что за последнюю неделю расходы на кафе выросли. Хочешь, разберём?
+              Привет, Гость! 👋 Я вижу, что за последнюю неделю расходы на кафе выросли. Хочешь, разберём?
             </div>
             <div class="msg msg--bot" style="animation-delay:.35s">
               Могу помочь с бюджетом, налогами или найти, куда утекают деньги.
@@ -2007,7 +2036,7 @@ body{
       <section class="view view--profile" data-view="profile">
         <div class="top">
           <div class="statusbar rise" style="--d:.05s">
-            <span>9:41</span>
+            <span></span>
             <span class="sb-right">
               <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
               <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M1.4 4.3a10 10 0 0 1 13.2 0"/><path d="M4 7.1a6.4 6.4 0 0 1 8 0"/><circle cx="8" cy="10.4" r="1.1" fill="currentColor" stroke="none"/></svg>
@@ -2016,10 +2045,10 @@ body{
           </div>
 
           <div class="profile-hero rise" style="--d:.10s">
-            <div class="profile-avatar">А</div>
+            <div class="profile-avatar">Л</div>
             <div>
-              <h1>Александра</h1>
-              <p>alex@lunetra.app · Pro</p>
+              <h1>Гость</h1>
+              <p>Локальный профиль</p>
             </div>
           </div>
 
@@ -2247,6 +2276,7 @@ body{
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
+
 
 
 
@@ -3081,7 +3111,7 @@ async function editName() {
   });
   if (newName && String(newName).trim()) {
     state.user.name = String(newName).trim();
-    saveState(); updateAvatarUI(); toast('Имя изменено');
+    saveState(); updateAvatarUI(); toast('Имя изменено'); try { document.querySelectorAll('.appbar .name, .profile-hero h1').forEach(function(el){ el.textContent = state.user.name; }); } catch(e) {};
   }
 }
 
@@ -4430,6 +4460,75 @@ else bootApp();
 })();
 
 
+
 </script>
+
+<script>
+/* Product polish */
+(function() {
+  // Full viewport; no demo chrome
+  document.documentElement.style.height = '100%';
+  document.body.style.height = '100%';
+  document.body.style.overflow = 'hidden';
+
+  // Hide any leftover status bars
+  document.querySelectorAll('.statusbar').forEach(function(el) { el.remove(); });
+
+  // Wire profile name from state when ready
+  function syncProfileUI() {
+    try {
+      if (!window.state || !state.user) return;
+      var name = state.user.name || 'Гость';
+      document.querySelectorAll('.appbar .name, .profile-hero h1, #profileName').forEach(function(el) {
+        if (el) el.textContent = name;
+      });
+      var letter = (name.charAt(0) || 'Л').toUpperCase();
+      document.querySelectorAll('.avatar, .profile-avatar').forEach(function(el) {
+        if (el && !el.querySelector('img')) el.textContent = letter;
+      });
+      var sub = document.querySelector('.profile-hero p');
+      if (sub) sub.textContent = (state.isPro ? 'Pro · ' : 'Free · ') + (state.user.id !== 'local' ? 'TG ' + state.user.id : 'На устройстве');
+    } catch (e) {}
+  }
+
+  var _rh = window.renderHome;
+  if (typeof _rh === 'function') {
+    window.renderHome = function() {
+      _rh.apply(this, arguments);
+      syncProfileUI();
+      try { renderAccountCardsDesign(); } catch (e) {}
+    };
+  }
+
+  // Safe openAddModal
+  document.querySelectorAll('.pill, .tab-fab, #fab').forEach(function(el) {
+    el.addEventListener('click', function(ev) {
+      // don't block existing handlers entirely
+    }, true);
+  });
+
+  // After boot, force is-ready
+  setTimeout(function() {
+    var app = document.getElementById('app');
+    if (app) app.classList.add('is-ready');
+    var sp = document.getElementById('splash');
+    if (sp) { sp.classList.add('splash--out'); sp.classList.add('hide'); }
+    try { if (typeof renderHome === 'function') renderHome(); } catch (e) {}
+    try { if (typeof renderTransactions === 'function') renderTransactions(); } catch (e) {}
+    try { if (typeof renderAccountCardsDesign === 'function') renderAccountCardsDesign(); } catch (e) {}
+    syncProfileUI();
+  }, 3000);
+
+  // Theme: design light top is default product look
+  try {
+    if (window.state && state.theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  } catch (e) {}
+})();
+</script>
+
 </body>
 </html>
