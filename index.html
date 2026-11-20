@@ -475,9 +475,90 @@ body.modal-open .floating-nav {
 .stat-mini .sm-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
 .stat-mini .sm-value { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
 
+
+/* Splash */
+.splash {
+  position: fixed; inset: 0; z-index: 99999; background: #0B0B0E;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: opacity .45s ease, visibility .45s;
+}
+.splash.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+.splash-logo {
+  width: 88px; height: 88px; border-radius: 24px;
+  background: linear-gradient(135deg, #0A84FF, #BF5AF2);
+  display: flex; align-items: center; justify-content: center;
+  animation: splashIn .9s cubic-bezier(.22,1,.36,1) both;
+  box-shadow: 0 12px 40px rgba(10,132,255,.35);
+}
+.splash-logo svg { width: 44px; height: 44px; stroke: #fff; fill: none; stroke-width: 1.8; }
+.splash-title {
+  margin-top: 18px; font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -.5px;
+  animation: splashIn .9s .15s cubic-bezier(.22,1,.36,1) both;
+}
+.splash-sub {
+  margin-top: 6px; font-size: 13px; color: rgba(255,255,255,.45);
+  animation: splashIn .9s .28s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes splashIn {
+  from { opacity: 0; transform: scale(.82) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-light) 25%, rgba(255,255,255,.08) 50%, var(--bg-light) 75%);
+  background-size: 200% 100%; animation: sk 1.2s ease infinite; border-radius: 12px;
+}
+@keyframes sk { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.sk-row { height: 56px; margin-bottom: 10px; }
+.sk-title { height: 22px; width: 40%; margin-bottom: 14px; }
+.view { animation: viewIn .35s ease both; }
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.item-card {
+  animation: cardIn .4s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.nav-btn, .btn-primary, .action-main, .action-pill, .tool-btn, .chip {
+  transition: transform .18s cubic-bezier(.22,1,.36,1), opacity .2s;
+}
+.nav-btn:active, .btn-primary:active, .action-main:active, .action-pill:active, .tool-btn:active, .chip:active {
+  transform: scale(.92);
+}
+.item-actions {
+  position: absolute; right: 0; top: 0; bottom: 0; display: flex; z-index: 1;
+}
+.item-actions button {
+  border: none; color: #fff; padding: 0 16px; font-weight: 600; font-size: 12px; font-family: var(--font);
+  cursor: pointer;
+}
+.item-actions .act-edit { background: #0A84FF; }
+.item-actions .act-del { background: #FF3B30; border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+.item-card { position: relative; overflow: hidden; }
+.item-card.swiped { transform: translateX(-120px); }
+.item-card.swiped .item-actions { pointer-events: all; }
+.wallet-chip-row { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 10px; scrollbar-width: none; }
+.wallet-chip {
+  flex-shrink: 0; padding: 8px 14px; border-radius: 20px; border: none;
+  background: var(--bg-light); font-weight: 600; font-size: 12px; font-family: var(--font);
+  color: var(--text-main); cursor: pointer;
+}
+.wallet-chip.active { background: var(--dark-bg); color: #fff; }
+
 </style>
 </head>
 <body>
+<div class="splash" id="splash">
+  <div class="splash-logo">
+    <svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0 0 14c1 0 2-.2 2.8-.6A6 6 0 1 1 12 3z"/><path d="M8 17l2-3 2 1 3-5 2 2"/></svg>
+  </div>
+  <div class="splash-title">Lunetra</div>
+  <div class="splash-sub">Ваши финансы под контролем</div>
+</div>
+
 
 <!-- Subscribe modal (once) -->
 <div class="subscribe-modal" id="subscribeModal">
@@ -528,6 +609,8 @@ body.modal-open .floating-nav {
 
 <div class="content-area">
   <main class="view active" id="view-home">
+    <div class="wallet-chip-row" id="walletChips"></div>
+
     <div class="insight-strip" id="insightStrip">Добро пожаловать в Lunetra ✨</div>
     <div class="budget-card" id="budgetCard">
       <div class="budget-header"><span>Бюджет на месяц</span><span id="budgetText">0 / 0 ₽</span></div>
@@ -763,7 +846,7 @@ body.modal-open .floating-nav {
     </div>
 
     <div style="text-align:center;margin-top:28px;font-size:12px;color:var(--text-muted);">
-      Lunetra v1.6 · Free / Pro · Business · Приватный трекер<br>Данные только на вашем устройстве
+      Lunetra v1.7 · UX · CRUD · Multi-balance · Приватный трекер<br>Данные только на вашем устройстве
     </div>
   </main>
 </div>
@@ -1155,6 +1238,14 @@ function setFilter(f) {
 function getFilteredTx() {
   let list = [...state.transactions];
   const now = new Date();
+  // filter by selected wallet (home context)
+  if (!state.filterAllWallets) {
+    const wid = currentWalletId();
+    list = list.filter(t => {
+      if (t.type === 'transfer') return t.wallet === wid || t.walletTo === wid;
+      return (t.wallet || 'main') === wid;
+    });
+  }
   if (currentFilter === 'expense') list = list.filter(t => t.type === 'expense');
   if (currentFilter === 'income') list = list.filter(t => t.type === 'income');
   if (currentFilter === 'today') list = list.filter(t => new Date(t.date).toDateString() === now.toDateString());
@@ -1172,12 +1263,25 @@ function getFilteredTx() {
 
 function renderHome() {
   updateStreak();
-  const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount||0), 0);
-  const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount||0), 0);
-  const balance = totalIncome - totalExpense;
-  animateValue(document.getElementById('mainBalance'), 0, balance, 1000);
-  document.getElementById('balanceSub').textContent = `Доходы: ${fmt(totalIncome)} · Расходы: ${fmt(totalExpense)}`;
-  document.getElementById('walletName').textContent = state.wallets[state.currentWallet]?.name || 'Основной счёт';
+  if (!state.wallets || !state.wallets.length) {
+    state.wallets = [{ id: 'main', name: 'Основной счёт', kind: 'card' }];
+    state.currentWallet = 0;
+  }
+  if (state.currentWallet >= state.wallets.length) state.currentWallet = 0;
+  const wid = currentWalletId();
+  const ie = walletIncomeExpense(wid);
+  const balance = walletBalanceOf(wid);
+  const totalAll = totalBalanceAllWallets();
+  const balEl = document.getElementById('mainBalance');
+  if (balEl) {
+    if (state.hideBalance) balEl.textContent = '••••';
+    else animateValue(balEl, 0, balance, 700);
+  }
+  const sub = document.getElementById('balanceSub');
+  if (sub) sub.textContent = 'Доходы: ' + fmt(ie.income) + ' · Расходы: ' + fmt(ie.expense) + ' · Всего: ' + fmt(totalAll);
+  const wn = document.getElementById('walletName');
+  if (wn) wn.textContent = state.wallets[state.currentWallet]?.name || 'Счёт';
+  try { renderWalletChips(); } catch (e) {}
 
   const bFill = document.getElementById('budgetFill');
   const bText = document.getElementById('budgetText');
@@ -1216,9 +1320,10 @@ function renderHome() {
 
 function renderTransactions() {
   const list = document.getElementById('recentTxList');
+  if (!list) return;
   const filtered = getFilteredTx().slice(0, 50);
   if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div>Пока пусто</div><p>Нажмите + чтобы добавить первую операцию</p></div>`;
+    list.innerHTML = `<div class="empty-state"><div class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div>Пока пусто</div><p>Нажмите + чтобы добавить операцию на этот счёт</p></div>`;
     return;
   }
   const pad = state.compact ? '12px' : '16px';
@@ -1227,15 +1332,18 @@ function renderTransactions() {
     const sign = t.type === 'income' ? '+' : (t.type === 'transfer' ? '↔' : '−');
     const dateStr = new Date(t.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
     const note = t.note ? ` · ${t.note}` : '';
-    return `<div class="item-card" style="padding:${pad};animation-delay:${Math.min(i * .04, .5)}s" onclick="toggleSwipe(this)">
+    const wName = (walletById(t.wallet) || {}).name || '';
+    return `<div class="item-card" style="padding:${pad};animation-delay:${Math.min(i * .04, .45)}s" onclick="toggleSwipe(this)">
       <div class="item-icon" style="background:${c.color}18;color:${c.color};z-index:2;"><div class="icon">${SVG_ICONS[c.id] || SVG_ICONS.other}</div></div>
-      <div class="item-info" style="z-index:2;"><div class="item-name">${c.name}${note}</div><div class="item-desc">${dateStr}</div></div>
+      <div class="item-info" style="z-index:2;"><div class="item-name">${c.name}${note}</div><div class="item-desc">${dateStr}${wName ? ' · ' + wName : ''}</div></div>
       <div class="item-right" style="z-index:2;"><div class="item-amount ${t.type}">${sign}${fmt(t.amount)}</div></div>
-      <button class="delete-btn" onclick="deleteTransaction('${t.id}', event)"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div></button>
+      <div class="item-actions">
+        <button type="button" class="act-edit" onclick="event.stopPropagation();editTransaction('${t.id}')">Изменить</button>
+        <button type="button" class="act-del" onclick="event.stopPropagation();deleteTransaction('${t.id}', event)">Удалить</button>
+      </div>
     </div>`;
   }).join('');
 }
-
 function toggleSwipe(el) {
   const isSwiped = el.classList.contains('swiped');
   document.querySelectorAll('.item-card').forEach(c => c.classList.remove('swiped'));
@@ -1243,7 +1351,7 @@ function toggleSwipe(el) {
 }
 
 async function deleteTransaction(id, event) {
-  event.stopPropagation();
+  if (event && event.stopPropagation) event.stopPropagation();
   if (!(await nativeConfirm('Удалить операцию?', 'Можно будет отменить через «Отмена»', true))) return;
   const tx = state.transactions.find(t => t.id === id);
   if (tx) state.lastDeleted = { ...tx };
@@ -1394,6 +1502,7 @@ function renderGoals() {
     const pct = Math.min(100, Math.round((g.current / g.target) * 100));
     return `<div class="goal-card" style="animation-delay:${i*.06}s">
       <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-weight:700;font-size:15px;">${g.name}</div>
+      <button onclick="editGoal('${g.id}')" style="background:none;border:none;color:var(--blue);font-weight:600;font-size:12px;cursor:pointer;margin-right:8px;">Изменить</button>
       <button onclick="deleteGoal('${g.id}')" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;">×</button></div>
       <div class="goal-progress"><div class="goal-fill" style="width:${pct}%;background:${g.color || 'var(--blue)'}"></div></div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);"><span>${fmt(g.current)} / ${fmt(g.target)}</span><span>${pct}%</span></div>
@@ -2366,21 +2475,45 @@ function walletById(id) {
   return (state.wallets || []).find(function(w){ return w.id === id; });
 }
 function walletBalanceOf(id) {
+  var bal = 0;
+  (state.transactions || []).forEach(function(t) {
+    var amt = Number(t.amount || 0);
+    if (t.type === 'transfer') {
+      if (t.wallet === id) bal -= amt;
+      if (t.walletTo === id) bal += amt;
+      return;
+    }
+    if ((t.wallet || 'main') !== id) return;
+    if (t.type === 'income') bal += amt;
+    else if (t.type === 'expense') bal -= amt;
+  });
+  return bal;
+}
+function totalBalanceAllWallets() {
+  return (state.wallets || []).reduce(function(s, w) { return s + walletBalanceOf(w.id); }, 0);
+}
+function currentWalletId() {
+  var w = state.wallets[state.currentWallet];
+  return w ? w.id : (state.wallets[0] && state.wallets[0].id) || 'main';
+}
+function selectWallet(index) {
+  if (index < 0 || index >= (state.wallets || []).length) return;
+  state.currentWallet = index;
+  saveState();
+  renderHome();
+  haptic('light');
+}
+function walletIncomeExpense(id) {
   var inc = 0, exp = 0;
   (state.transactions || []).forEach(function(t) {
-    if ((t.wallet || 'main') !== id) return;
     if (t.type === 'transfer') return;
-    if (t.type === 'income') inc += Number(t.amount||0);
-    else if (t.type === 'expense') exp += Number(t.amount||0);
+    if ((t.wallet || 'main') !== id) return;
+    if (t.type === 'income') inc += Number(t.amount || 0);
+    else if (t.type === 'expense') exp += Number(t.amount || 0);
   });
-  // transfers in/out
-  (state.transactions || []).forEach(function(t) {
-    if (t.type !== 'transfer') return;
-    if (t.walletTo === id) inc += Number(t.amount||0);
-    if (t.wallet === id) exp += Number(t.amount||0);
-  });
-  return inc - exp;
+  return { income: inc, expense: exp };
 }
+
 function addWallet() {
   if (!isProActive() && (state.wallets || []).length >= 2) {
     requirePro('Больше 2 счетов');
@@ -2447,12 +2580,22 @@ function transferBetweenWallets() {
 function renderWalletsUI() {
   var el = document.getElementById('walletsList');
   if (!el) return;
-  el.innerHTML = (state.wallets||[]).map(function(w){
-    return '<div class="settings-row" style="margin-bottom:8px;"><span style="font-weight:600;font-size:14px;">'+w.name+' <span style="color:var(--text-muted);font-weight:500;font-size:12px;">'+(w.kind||'')+'</span></span><span style="font-weight:700;">'+fmt(walletBalanceOf(w.id))+'</span></div>';
+  el.innerHTML = (state.wallets || []).map(function(w) {
+    return '<div class="settings-row" style="margin-bottom:8px;flex-wrap:wrap;gap:8px;">' +
+      '<div style="flex:1;min-width:120px;"><div style="font-weight:600;font-size:14px;">' + w.name + '</div>' +
+      '<div style="font-size:11px;color:var(--text-muted);">' + (w.kind || '') + ' · ' + fmt(walletBalanceOf(w.id)) + '</div></div>' +
+      '<button type="button" data-wid="' + w.id + '" class="btn-edit-wallet" style="border:none;background:var(--bg-light);padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Изменить</button>' +
+      '<button type="button" data-wid="' + w.id + '" class="btn-del-wallet" style="border:none;background:#FFF0F0;color:#FF3B30;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Удалить</button></div>';
   }).join('') +
-  '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">'+
-  '<button type="button" class="btn-primary" style="flex:1;padding:12px;font-size:14px;" onclick="addWallet()">+ Счёт</button>'+
+  '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">' +
+  '<button type="button" class="btn-primary" style="flex:1;padding:12px;font-size:14px;" onclick="addWallet()">+ Счёт</button>' +
   '<button type="button" style="flex:1;padding:12px;border:none;border-radius:var(--radius-md);background:var(--bg-light);font-weight:600;font-size:14px;cursor:pointer;" onclick="transferBetweenWallets()">Перевод</button></div>';
+  el.querySelectorAll('.btn-edit-wallet').forEach(function(btn) {
+    btn.onclick = function() { editWallet(btn.getAttribute('data-wid')); };
+  });
+  el.querySelectorAll('.btn-del-wallet').forEach(function(btn) {
+    btn.onclick = function() { deleteWallet(btn.getAttribute('data-wid')); };
+  });
 }
 
 
@@ -2543,6 +2686,87 @@ function renderBusinessUI() {
     '<div class="stat-mini"><div class="sm-label">Последние операции</div>'+recent+'</div>';
 }
 
+
+/* —— CRUD transactions / wallets / goals —— */
+async function editTransaction(id) {
+  const t = state.transactions.find(x => x.id === id);
+  if (!t) return;
+  if (t.type === 'transfer') { toast('Перевод: удалите и создайте заново'); return; }
+  const val = await nativePrompt('Сумма', t.amount, { inputMode: 'decimal', placeholder: 'Сумма' });
+  if (val == null || val === '') return;
+  const num = parseFloat(String(val).replace(/\s/g,'').replace(',','.'));
+  if (!num || num <= 0) { toast('Некорректная сумма'); return; }
+  const note = await nativePrompt('Заметка', t.note || '', { placeholder: 'Заметка' });
+  if (note == null) return;
+  // category keep; optional wallet
+  const names = (state.wallets||[]).map((w,i)=> (i+1)+') '+w.name).join('\n');
+  const wIdx = await nativePrompt('Счёт (номер)', String((state.wallets||[]).findIndex(w=>w.id===(t.wallet||'main'))+1 || 1), { inputMode: 'numeric', placeholder: 'Номер', desc: names });
+  if (wIdx == null) return;
+  const wi = parseInt(wIdx,10)-1;
+  t.amount = num;
+  t.note = String(note).trim();
+  if (state.wallets[wi]) t.wallet = state.wallets[wi].id;
+  saveState(); renderHome(); toast('Операция обновлена'); haptic('success');
+}
+function editWallet(id) {
+  const w = walletById(id);
+  if (!w) return;
+  nativePrompt('Название счёта', w.name, { placeholder: 'Название' }).then(function(name) {
+    if (name == null || !String(name).trim()) return;
+    showNativeDialog({ title: 'Тип счёта', desc: 'cash / card / crypto / business / other', showInput: true, value: w.kind || 'card', okText: 'Сохранить' }).then(function(kind) {
+      if (kind == null) return;
+      kind = String(kind).toLowerCase();
+      if (!['cash','card','crypto','business','other'].includes(kind)) kind = 'other';
+      w.name = String(name).trim();
+      w.kind = kind;
+      saveState(); renderWalletsUI(); renderHome(); toast('Счёт обновлён');
+    });
+  });
+}
+async function deleteWallet(id) {
+  if ((state.wallets || []).length <= 1) { toast('Нужен хотя бы один счёт'); return; }
+  const w = walletById(id);
+  if (!w) return;
+  const ok = await nativeConfirm('Удалить счёт?', '«' + w.name + '». Транзакции можно перенести.', true);
+  if (!ok) return;
+  const others = state.wallets.filter(x => x.id !== id);
+  const names = others.map((x,i)=> (i+1)+') '+x.name).join('\n');
+  const to = await nativePrompt('Перенести операции на счёт №', '1', { inputMode: 'numeric', desc: names, placeholder: '1' });
+  if (to == null) return;
+  const ti = parseInt(to,10)-1;
+  const target = others[ti] || others[0];
+  state.transactions.forEach(function(t) {
+    if (t.wallet === id) t.wallet = target.id;
+    if (t.walletTo === id) t.walletTo = target.id;
+  });
+  state.wallets = state.wallets.filter(x => x.id !== id);
+  if (state.currentWallet >= state.wallets.length) state.currentWallet = 0;
+  saveState(); renderWalletsUI(); renderHome(); toast('Счёт удалён'); haptic('success');
+}
+async function editGoal(id) {
+  const g = state.goals.find(x => x.id === id);
+  if (!g) return;
+  const name = await nativePrompt('Название цели', g.name, { placeholder: 'Название' });
+  if (name == null || !String(name).trim()) return;
+  const target = await nativePrompt('Целевая сумма', g.target, { inputMode: 'decimal' });
+  if (target == null) return;
+  const num = parseFloat(String(target).replace(/\s/g,'').replace(',','.'));
+  if (!num || num <= 0) { toast('Некорректная сумма'); return; }
+  const cur = await nativePrompt('Уже накоплено', g.current || 0, { inputMode: 'decimal' });
+  if (cur == null) return;
+  g.name = String(name).trim();
+  g.target = num;
+  g.current = parseFloat(String(cur).replace(/\s/g,'').replace(',','.')) || 0;
+  saveState(); renderGoals(); toast('Цель обновлена');
+}
+function renderWalletChips() {
+  var row = document.getElementById('walletChips');
+  if (!row) return;
+  row.innerHTML = (state.wallets||[]).map(function(w, i) {
+    return '<button type="button" class="wallet-chip'+(i===state.currentWallet?' active':'')+'" onclick="selectWallet('+i+')">'+w.name+' · '+fmt(walletBalanceOf(w.id))+'</button>';
+  }).join('');
+}
+
 /* Boot */
 function bootApp() {
   try { validateState(); } catch (e) {}
@@ -2560,6 +2784,10 @@ function bootApp() {
   try {
     if (document.getElementById('sliderNeeds')) updateSliders('needs');
   } catch (e) { console.warn('calc', e); }
+  setTimeout(function() {
+    var sp = document.getElementById('splash');
+    if (sp) sp.classList.add('hide');
+  }, 1500);
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootApp);
 else bootApp();
