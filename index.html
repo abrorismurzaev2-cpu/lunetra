@@ -380,12 +380,14 @@ body.modal-open .floating-nav {
   background: rgba(0,0,0,.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   opacity: 0; pointer-events: none; transition: opacity .4s;
 }
+.subscribe-modal.force-hide{display:none!important;}
 .subscribe-modal.active { opacity: 1; pointer-events: all; }
 .subscribe-card {
   background: var(--card-bg); border-radius: 28px; padding: 32px 24px; max-width: 340px; width: 90%;
   text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,.35);
   transform: scale(.85) translateY(30px); transition: transform .5s var(--spring);
 }
+.subscribe-modal.force-hide{display:none!important;}
 .subscribe-modal.active .subscribe-card { transform: scale(1) translateY(0); }
 .subscribe-icon {
   width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #2AABEE, #229ED9);
@@ -563,6 +565,7 @@ body.modal-open .floating-nav {
 
   <main class="view" id="view-analytics">
     <div class="section-head"><h2 class="section-title">Аналитика</h2></div>
+    <div id="deepAnalytics" style="margin-bottom:14px;"></div>
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-label">Доходы</div><div class="stat-value" style="color:var(--green);" id="statIncome">0 ₽</div></div>
       <div class="stat-box"><div class="stat-label">Расходы</div><div class="stat-value" style="color:var(--red);" id="statExpense">0 ₽</div></div>
@@ -690,6 +693,28 @@ body.modal-open .floating-nav {
       </div>
     </div>
 
+    
+    <div class="section-head"><h2 class="section-title">Подписка</h2></div>
+    <div class="stat-mini" id="proCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div>
+          <div class="sm-label">Тариф</div>
+          <div class="sm-value" style="font-size:18px;">Free · 1 цель</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Pro: цели без лимита, Excel, совместный бюджет, аналитика</div>
+        </div>
+        <span id="proBadge" style="display:none;background:linear-gradient(135deg,#0A84FF,#BF5AF2);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">PRO</span>
+      </div>
+      <button type="button" id="proCtaBtn" class="btn-primary" style="margin-top:12px;" onclick="openProPaywall()">Перейти на Pro · 199 ₽</button>
+    </div>
+    <div class="settings-row" id="sharedBudgetRow" style="display:none;" onclick="openSharedBudget()">
+      <span style="font-weight:600;font-size:14px;">Совместный бюджет</span>
+      <span style="color:var(--blue);font-weight:600;font-size:13px;">Настроить</span>
+    </div>
+    <div class="item-card" onclick="openExternal('https://t.me/lunetra0')" style="margin-top:10px;">
+      <div class="item-icon" style="background:#E8F4FD;color:#2AABEE;"><div class="icon"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9 22 2z"/></svg></div></div>
+      <div class="item-info"><div class="item-name">Telegram-канал</div><div class="item-desc">Необязательно · новости и советы</div></div>
+    </div>
+
     <div class="section-head" style="margin-top:8px;"><h2 class="section-title">Инструменты</h2></div>
     <div id="smartStats"></div>
     <div class="tools-grid">
@@ -731,7 +756,7 @@ body.modal-open .floating-nav {
     </div>
 
     <div style="text-align:center;margin-top:28px;font-size:12px;color:var(--text-muted);">
-      Lunetra v1.4 · 100+ функций · Приватный трекер<br>Данные только на вашем устройстве
+      Lunetra v1.5 · Free / Pro · Приватный трекер<br>Данные только на вашем устройстве
     </div>
   </main>
 </div>
@@ -808,11 +833,15 @@ const defaultState = {
   wallets: [{ id: 'main', name: 'Основной счёт' }, { id: 'cash', name: 'Наличные' }, { id: 'card', name: 'Карта' }],
   transactions: [],
   goals: [],
-  lastDeleted: null
+  lastDeleted: null,
+  isPro: false,
+  proUntil: null,
+  sharedBudgetEnabled: false,
+  sharedPartnerName: ''
 };
 
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState;
-['wallets','goals','transactions','theme','haptic','hideBalance','compact','streak'].forEach(k => {
+['wallets','goals','transactions','theme','haptic','hideBalance','compact','streak','isPro','proUntil','sharedBudgetEnabled','sharedPartnerName'].forEach(k => {
   if (state[k] === undefined) state[k] = defaultState[k];
 });
 if (state.currentWallet === undefined) state.currentWallet = 0;
@@ -822,6 +851,69 @@ if (state.user.id == null) state.user.id = defaultState.user.id;
 if (state.user.avatar === undefined) state.user.avatar = null;
 
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+/* —— Freemium —— */
+const PRO_PRICE_RUB = 199;
+function isProActive() {
+  if (!state.isPro) return false;
+  if (state.proUntil) {
+    if (new Date(state.proUntil).getTime() < Date.now()) {
+      state.isPro = false; saveState(); return false;
+    }
+  }
+  return true;
+}
+function activeGoalsCount() {
+  return (state.goals || []).filter(g => (g.current || 0) < (g.target || Infinity) || !g.target).length;
+}
+function requirePro(featureName) {
+  if (isProActive()) return true;
+  showNativeDialog({
+    title: 'Lunetra Pro',
+    desc: (featureName || 'Эта функция') + ' доступна в Pro.\n\n• Неограниченные цели\n• Экспорт Excel/CSV\n• Совместный бюджет\n• Подробная аналитика\n\n199 ₽ / месяц',
+    showInput: false,
+    okText: 'Подключить Pro'
+  }).then(function(ok) {
+    if (ok) openProPaywall();
+  });
+  return false;
+}
+function openProPaywall() {
+  showNativeDialog({
+    title: 'Оформление Pro',
+    desc: '199 ₽/мес. Оплата в RuStore подключится после публикации. Сейчас — тестовая активация для проверки функций.',
+    showInput: false,
+    okText: 'Активировать тест'
+  }).then(function(ok) {
+    if (!ok) return;
+    state.isPro = true;
+    var d = new Date(); d.setDate(d.getDate() + 30);
+    state.proUntil = d.toISOString();
+    saveState();
+    try { updateProUI(); } catch(e) {}
+    toast('Pro активен 30 дней (тест)');
+    confetti();
+  });
+}
+function updateProUI() {
+  var el = document.getElementById('proBadge');
+  if (el) el.style.display = isProActive() ? 'inline-flex' : 'none';
+  var btn = document.getElementById('proCtaBtn');
+  if (btn) btn.textContent = isProActive() ? 'Pro активен' : 'Перейти на Pro · 199 ₽';
+  var shared = document.getElementById('sharedBudgetRow');
+  if (shared) shared.style.display = isProActive() ? 'flex' : 'none';
+}
+function openSharedBudget() {
+  if (!requirePro('Совместный бюджет')) return;
+  nativePrompt('Имя партнёра', state.sharedPartnerName || '', { placeholder: 'Как отображать партнёра' }).then(function(name) {
+    if (name == null) return;
+    state.sharedPartnerName = String(name).trim();
+    state.sharedBudgetEnabled = true;
+    saveState();
+    toast(state.sharedPartnerName ? ('Совместный бюджет: ' + state.sharedPartnerName) : 'Совместный бюджет включён');
+  });
+}
+
 
 let nf = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
 function fmt(val) { return nf.format(Math.round(val || 0)) + ' ' + state.currency; }
@@ -857,14 +949,8 @@ function confetti() {
 
 /* Subscribe once */
 function checkSubscribe() {
-  try {
-    if (localStorage.getItem(SUB_KEY) === '1') return;
-    setTimeout(function () {
-      if (localStorage.getItem(SUB_KEY) === '1') return;
-      var modal = document.getElementById('subscribeModal');
-      if (modal) modal.classList.add('active');
-    }, 500);
-  } catch (e) {}
+  /* Freemium: no forced Telegram gate on first launch */
+  return;
 }
 
 function openExternal(url) {
@@ -938,7 +1024,7 @@ function switchView(viewName) {
   if (el) el.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(n => n.classList.toggle('active', n.dataset.view === viewName));
   haptic('light');
-  if (viewName === 'analytics') initCharts();
+  if (viewName === 'analytics') { initCharts(); try { renderDeepAnalytics(); } catch(e) {} }
   if (viewName === 'calculator') calculateRule();
   if (viewName === 'goals') renderGoals();
   if (viewName === 'home') renderHome();
@@ -1284,6 +1370,13 @@ function submitGoal() {
   const target = parseFloat(document.getElementById('goalTarget').value.replace(/\s/g, '').replace(',', '.'));
   const current = parseFloat(document.getElementById('goalCurrent').value.replace(/\s/g, '').replace(',', '.')) || 0;
   if (!name || !target || target <= 0) { toast('Заполните название и сумму'); return; }
+  if (!isProActive()) {
+    var active = (state.goals || []).filter(function(g){ return (g.current || 0) < (g.target || 0); }).length;
+    if (active >= 1) {
+      requirePro('Больше 1 активной цели');
+      return;
+    }
+  }
   const colors = ['#0A84FF','#BF5AF2','#30D158','#FF9F0A','#FF375F'];
   state.goals.push({ id: 'g' + Date.now(), name, target, current, color: colors[state.goals.length % colors.length] });
   saveState(); closeGoalModal(); renderGoals(); haptic('success'); toast('Цель создана'); confetti();
@@ -1599,11 +1692,13 @@ function submitTransaction() {
 }
 
 function exportData() {
+  if (!requirePro('Экспорт данных')) return;
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `lunetra-${new Date().toISOString().slice(0,10)}.json`; a.click(); toast('JSON скачан');
 }
 function exportCSV() {
+  if (!requirePro('Экспорт в Excel/CSV')) return;
   const rows = [['id','type','amount','category','note','date','wallet']];
   state.transactions.forEach(t => rows.push([t.id, t.type, t.amount, t.category, (t.note || '').replace(/,/g,';'), t.date, t.wallet || '']));
   const csv = rows.map(r => r.join(',')).join('\n');
@@ -2020,14 +2115,123 @@ function quickReportFull() {
 
 /* patch switchView to refresh stats */
 
+
+/* —— Deep Analytics (Pro) —— */
+function monthKey(d) {
+  const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth()+1).padStart(2,'0');
+}
+function getMonthRange(offset) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() + (offset||0), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + (offset||0) + 1, 0, 23, 59, 59);
+  return { start, end };
+}
+function txsInRange(start, end, type) {
+  return (state.transactions||[]).filter(t => {
+    const d = new Date(t.date);
+    if (d < start || d > end) return false;
+    if (type && t.type !== type) return false;
+    return true;
+  });
+}
+function categoryBreakdown(list) {
+  const map = {};
+  list.forEach(t => { map[t.category] = (map[t.category]||0) + Number(t.amount||0); });
+  const total = Object.values(map).reduce((a,b)=>a+b,0) || 1;
+  return Object.keys(map).map(id => {
+    const cat = getCat(id);
+    return { id, name: cat.name, color: cat.color, amount: map[id], pct: Math.round(map[id]/total*1000)/10 };
+  }).sort((a,b)=>b.amount-a.amount);
+}
+function dailySeries(start, end, type) {
+  const days = [];
+  const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const endD = new Date(end);
+  while (cur <= endD) {
+    days.push({ key: cur.toDateString(), label: cur.getDate() + '', total: 0 });
+    cur.setDate(cur.getDate()+1);
+  }
+  const idx = {};
+  days.forEach((d,i)=> idx[d.key]=i);
+  txsInRange(start, end, type||'expense').forEach(t => {
+    const k = new Date(t.date).toDateString();
+    if (idx[k] != null) days[idx[k]].total += Number(t.amount||0);
+  });
+  return days;
+}
+function computeForecast() {
+  const { start, end } = getMonthRange(0);
+  const today = new Date();
+  const dayNum = today.getDate();
+  const daysInMonth = end.getDate();
+  const expenses = txsInRange(start, today, 'expense');
+  const totalExp = expenses.reduce((s,t)=>s+Number(t.amount||0),0);
+  const avgDaily = totalExp / Math.max(1, dayNum);
+  const projected = avgDaily * daysInMonth;
+  const budget = Number(state.budget||0);
+  const breakdown = categoryBreakdown(expenses);
+  const top = breakdown[0];
+  let zeroDay = null;
+  if (budget > 0 && avgDaily > 0) {
+    const left = budget - totalExp;
+    if (left <= 0) zeroDay = dayNum;
+    else zeroDay = Math.min(daysInMonth, dayNum + Math.floor(left / avgDaily));
+  }
+  let tip = 'Данных пока мало — добавьте расходы за несколько дней.';
+  if (avgDaily > 0 && top) {
+    if (budget > 0 && zeroDay) {
+      tip = 'При текущем темпе лимит бюджета будет исчерпан к ' + zeroDay + ' числу. Рекомендуем сократить траты на «' + top.name + '» (' + top.pct + '% расходов).';
+    } else if (budget > 0) {
+      tip = 'Прогноз расходов месяца: ' + fmt(projected) + ' при лимите ' + fmt(budget) + '. Крупнее всего «' + top.name + '».';
+    } else {
+      tip = 'Средний дневной расход ' + fmt(avgDaily) + '. Прогноз месяца: ' + fmt(projected) + '. Сократите «' + top.name + '» для экономии.';
+    }
+  }
+  return { avgDaily, projected, totalExp, dayNum, daysInMonth, zeroDay, top, tip, breakdown, budget };
+}
+function renderDeepAnalytics() {
+  const box = document.getElementById('deepAnalytics');
+  if (!box) return;
+  if (!isProActive()) {
+    box.innerHTML = '<div class="stat-mini"><div class="sm-label">Pro</div><div class="sm-value" style="font-size:15px;font-weight:600;">Подробная аналитика доступна в Pro</div><button type="button" class="btn-primary" style="margin-top:12px;" onclick="openProPaywall()">Открыть Pro · 199 ₽</button></div>';
+    return;
+  }
+  const f = computeForecast();
+  const { start, end } = getMonthRange(0);
+  const prev = getMonthRange(-1);
+  const curDays = dailySeries(start, end, 'expense');
+  const prevExp = txsInRange(prev.start, prev.end, 'expense').reduce((s,t)=>s+Number(t.amount||0),0);
+  const curExp = f.totalExp;
+  const diff = curExp - prevExp;
+  const pie = f.breakdown.slice(0, 6).map(c =>
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg-light);"><span style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+c.color+'"></span>'+c.name+'</span><span style="font-weight:700;">'+c.pct+'% · '+fmt(c.amount)+'</span></div>'
+  ).join('') || '<div class="sm-label">Нет расходов</div>';
+  const maxD = Math.max(1, ...curDays.map(d=>d.total));
+  const bars = curDays.map(d => {
+    const h = Math.round(d.total / maxD * 64);
+    return '<div title="'+d.label+': '+d.total+'" style="flex:1;min-width:4px;background:var(--blue);opacity:'+(d.total?'.9':'.15')+';height:'+(d.total?Math.max(4,h):4)+'px;border-radius:3px 3px 0 0;"></div>';
+  }).join('');
+  box.innerHTML =
+    '<div class="stat-mini"><div class="sm-label">Прогноз</div><div style="font-size:14px;line-height:1.45;font-weight:600;">'+f.tip+'</div>'+
+    '<div style="margin-top:10px;font-size:13px;color:var(--text-muted);">Средний день: <b>'+fmt(f.avgDaily)+'</b> · Прогноз месяца: <b>'+fmt(f.projected)+'</b></div></div>'+
+    '<div class="stat-mini"><div class="sm-label">Расходы по категориям (месяц)</div>'+pie+'</div>'+
+    '<div class="stat-mini"><div class="sm-label">Динамика по дням</div><div style="display:flex;align-items:flex-end;gap:2px;height:72px;margin-top:8px;">'+bars+'</div>'+
+    '<div style="margin-top:10px;font-size:13px;">Этот месяц: <b>'+fmt(curExp)+'</b> · Прошлый: <b>'+fmt(prevExp)+'</b> · Δ '+(diff>=0?'+':'')+fmt(diff)+'</div></div>';
+}
+
 /* Boot */
 function bootApp() {
   try { validateState(); } catch (e) {}
-  try { checkSubscribe(); } catch (e) { console.warn('sub', e); }
+  try {
+    checkSubscribe();
+    var sm = document.getElementById('subscribeModal');
+    if (sm) { sm.classList.remove('active'); sm.style.display = 'none'; }
+  } catch (e) { console.warn('sub', e); }
   try { applyTheme(); } catch (e) { console.warn('theme', e); }
   try { updateAvatarUI(); } catch (e) { console.warn('avatar', e); }
   try { renderHome(); } catch (e) { console.warn('home', e); }
   try { refreshSmartStats(); } catch (e) {}
+  try { updateProUI(); } catch (e) {}
   try {
     if (document.getElementById('sliderNeeds')) updateSliders('needs');
   } catch (e) { console.warn('calc', e); }
