@@ -633,6 +633,11 @@ body.modal-open .floating-nav {
     </div>
   </main>
 
+  <main class="view" id="view-business">
+    <div class="section-head"><h2 class="section-title">Бизнес</h2></div>
+    <div id="businessPanel"></div>
+  </main>
+
   <main class="view" id="view-profile">
     <div class="profile-header">
       <div class="profile-avatar-large" id="avatarTapArea" role="button" aria-label="Сменить фото">
@@ -694,13 +699,15 @@ body.modal-open .floating-nav {
     </div>
 
     
-    <div class="section-head"><h2 class="section-title">Подписка</h2></div>
+    <div class="section-head"><h2 class="section-title">Счета</h2></div>
+    <div id="walletsList"></div>
+    <div class="section-head" style="margin-top:16px;"><h2 class="section-title">Подписка</h2></div>
     <div class="stat-mini" id="proCard">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
         <div>
           <div class="sm-label">Тариф</div>
-          <div class="sm-value" style="font-size:18px;">Free · 1 цель</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Pro: цели без лимита, Excel, совместный бюджет, аналитика</div>
+          <div class="sm-value" style="font-size:18px;" id="proTariffLabel">Free · 2 счёта · 1 цель</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Pro: счета и цели без лимита, Excel, бизнес, аналитика · 199 ₽/мес или 1490 ₽/год · trial 7 дней</div>
         </div>
         <span id="proBadge" style="display:none;background:linear-gradient(135deg,#0A84FF,#BF5AF2);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">PRO</span>
       </div>
@@ -756,7 +763,7 @@ body.modal-open .floating-nav {
     </div>
 
     <div style="text-align:center;margin-top:28px;font-size:12px;color:var(--text-muted);">
-      Lunetra v1.5 · Free / Pro · Приватный трекер<br>Данные только на вашем устройстве
+      Lunetra v1.6 · Free / Pro · Business · Приватный трекер<br>Данные только на вашем устройстве
     </div>
   </main>
 </div>
@@ -779,6 +786,7 @@ body.modal-open .floating-nav {
   <button class="nav-btn active" data-view="home" onclick="switchView('home')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div></button>
   <button class="nav-btn" data-view="analytics" onclick="switchView('analytics')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div></button>
   <button class="nav-btn" data-view="goals" onclick="switchView('goals')"><div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div></button>
+  <button class="nav-btn" data-view="business" onclick="switchView('business')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div></button>
   <button class="nav-btn" data-view="calculator" onclick="switchView('calculator')"><div class="icon"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="8" y1="14" x2="8" y2="14.01"/></svg></div></button>
   <button class="nav-btn" data-view="profile" onclick="switchView('profile')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></button>
 </nav>
@@ -830,20 +838,30 @@ const defaultState = {
   user: { name: tg?.initDataUnsafe?.user?.first_name || 'Гость', avatar: null, id: tg?.initDataUnsafe?.user?.id || 'local' },
   currency: '₽', budget: 0, theme: 'light', haptic: true, hideBalance: false, compact: false,
   currentWallet: 0, lastActive: null, streak: 0,
-  wallets: [{ id: 'main', name: 'Основной счёт' }, { id: 'cash', name: 'Наличные' }, { id: 'card', name: 'Карта' }],
+  wallets: [
+    { id: 'main', name: 'Основной счёт', kind: 'card' },
+    { id: 'cash', name: 'Наличные', kind: 'cash' }
+  ],
   transactions: [],
   goals: [],
   lastDeleted: null,
   isPro: false,
   proUntil: null,
+  proPlan: null,
+  trialUsed: false,
   sharedBudgetEnabled: false,
-  sharedPartnerName: ''
+  sharedPartnerName: '',
+  businessTx: [],
+  weeklyBudget: 0
 };
 
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState;
-['wallets','goals','transactions','theme','haptic','hideBalance','compact','streak','isPro','proUntil','sharedBudgetEnabled','sharedPartnerName'].forEach(k => {
+['wallets','goals','transactions','theme','haptic','hideBalance','compact','streak','isPro','proUntil','proPlan','trialUsed','sharedBudgetEnabled','sharedPartnerName','businessTx','weeklyBudget'].forEach(k => {
   if (state[k] === undefined) state[k] = defaultState[k];
 });
+if (!Array.isArray(state.businessTx)) state.businessTx = [];
+if (!Array.isArray(state.wallets) || !state.wallets.length) state.wallets = defaultState.wallets.slice();
+
 if (state.currentWallet === undefined) state.currentWallet = 0;
 if (!state.user || typeof state.user !== 'object') state.user = Object.assign({}, defaultState.user);
 if (state.user.name == null) state.user.name = defaultState.user.name;
@@ -852,56 +870,85 @@ if (state.user.avatar === undefined) state.user.avatar = null;
 
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
-/* —— Freemium —— */
-const PRO_PRICE_RUB = 199;
+
+/* —— Freemium + Annual + Trial —— */
+const PRO_PRICE_MONTH = 199;
+const PRO_PRICE_YEAR = 1490;
+const TRIAL_DAYS = 7;
 function isProActive() {
-  if (!state.isPro) return false;
-  if (state.proUntil) {
+  if (state.isPro && state.proUntil) {
     if (new Date(state.proUntil).getTime() < Date.now()) {
-      state.isPro = false; saveState(); return false;
+      state.isPro = false; state.proPlan = null; saveState();
+      return false;
     }
+    return true;
   }
-  return true;
-}
-function activeGoalsCount() {
-  return (state.goals || []).filter(g => (g.current || 0) < (g.target || Infinity) || !g.target).length;
+  return !!state.isPro;
 }
 function requirePro(featureName) {
   if (isProActive()) return true;
   showNativeDialog({
     title: 'Lunetra Pro',
-    desc: (featureName || 'Эта функция') + ' доступна в Pro.\n\n• Неограниченные цели\n• Экспорт Excel/CSV\n• Совместный бюджет\n• Подробная аналитика\n\n199 ₽ / месяц',
+    desc: (featureName || 'Эта функция') + ' доступна в Pro.\n\n• Счета без лимита\n• Цели без лимита\n• Excel / CSV\n• Бизнес-инструменты\n• Подробная аналитика\n\n199 ₽/мес или 1490 ₽/год\nПробный период 7 дней',
     showInput: false,
-    okText: 'Подключить Pro'
-  }).then(function(ok) {
-    if (ok) openProPaywall();
-  });
+    okText: 'Смотреть тарифы'
+  }).then(function(ok) { if (ok) openProPaywall(); });
   return false;
 }
 function openProPaywall() {
   showNativeDialog({
-    title: 'Оформление Pro',
-    desc: '199 ₽/мес. Оплата в RuStore подключится после публикации. Сейчас — тестовая активация для проверки функций.',
-    showInput: false,
-    okText: 'Активировать тест'
-  }).then(function(ok) {
-    if (!ok) return;
-    state.isPro = true;
-    var d = new Date(); d.setDate(d.getDate() + 30);
-    state.proUntil = d.toISOString();
-    saveState();
-    try { updateProUI(); } catch(e) {}
-    toast('Pro активен 30 дней (тест)');
-    confetti();
+    title: 'Lunetra Pro',
+    desc: 'Выберите тариф:\n\n1) 7 дней бесплатно (trial)\n2) 199 ₽ / месяц\n3) 1490 ₽ / год (−37%)\n\nПока тестовая активация. Оплата RuStore — после публикации.',
+    showInput: true,
+    placeholder: 'Введите: trial / month / year',
+    value: state.trialUsed ? 'month' : 'trial',
+    okText: 'Активировать'
+  }).then(function(v) {
+    if (v == null || v === '') return;
+    var plan = String(v).trim().toLowerCase();
+    activateProPlan(plan);
   });
+}
+function activateProPlan(plan) {
+  var d = new Date();
+  if (plan === 'trial' || plan === '1' || plan === 'пробный') {
+    if (state.trialUsed && !isProActive()) {
+      toast('Trial уже использован — выберите month или year');
+      setTimeout(openProPaywall, 600);
+      return;
+    }
+    d.setDate(d.getDate() + TRIAL_DAYS);
+    state.isPro = true; state.proPlan = 'trial'; state.proUntil = d.toISOString(); state.trialUsed = true;
+    saveState(); updateProUI(); confetti(); toast('Pro trial на 7 дней');
+    return;
+  }
+  if (plan === 'year' || plan === 'year' || plan === 'год' || plan === '3' || plan === '1490') {
+    d.setFullYear(d.getFullYear() + 1);
+    state.isPro = true; state.proPlan = 'year'; state.proUntil = d.toISOString();
+    saveState(); updateProUI(); confetti(); toast('Pro на год · 1490 ₽ (тест)');
+    return;
+  }
+  d.setDate(d.getDate() + 30);
+  state.isPro = true; state.proPlan = 'month'; state.proUntil = d.toISOString();
+  saveState(); updateProUI(); confetti(); toast('Pro на месяц · 199 ₽ (тест)');
 }
 function updateProUI() {
   var el = document.getElementById('proBadge');
   if (el) el.style.display = isProActive() ? 'inline-flex' : 'none';
   var btn = document.getElementById('proCtaBtn');
-  if (btn) btn.textContent = isProActive() ? 'Pro активен' : 'Перейти на Pro · 199 ₽';
+  if (btn) {
+    if (!isProActive()) btn.textContent = 'Pro · trial / 199 ₽ / 1490 ₽';
+    else if (state.proPlan === 'year') btn.textContent = 'Pro год активен';
+    else if (state.proPlan === 'trial') btn.textContent = 'Pro trial активен';
+    else btn.textContent = 'Pro месяц активен';
+  }
   var shared = document.getElementById('sharedBudgetRow');
   if (shared) shared.style.display = isProActive() ? 'flex' : 'none';
+  var subLabel = document.getElementById('proTariffLabel');
+  if (subLabel) {
+    if (!isProActive()) subLabel.textContent = 'Free · 2 счёта · 1 цель';
+    else subLabel.textContent = 'Pro · ' + (state.proPlan || 'active');
+  }
 }
 function openSharedBudget() {
   if (!requirePro('Совместный бюджет')) return;
@@ -913,6 +960,7 @@ function openSharedBudget() {
     toast(state.sharedPartnerName ? ('Совместный бюджет: ' + state.sharedPartnerName) : 'Совместный бюджет включён');
   });
 }
+
 
 
 let nf = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
@@ -1028,7 +1076,8 @@ function switchView(viewName) {
   if (viewName === 'calculator') calculateRule();
   if (viewName === 'goals') renderGoals();
   if (viewName === 'home') renderHome();
-  if (viewName === 'profile') { try { refreshSmartStats(); } catch(e) {} }
+  if (viewName === 'profile') { try { refreshSmartStats(); renderWalletsUI(); updateProUI(); } catch(e) {} }
+  if (viewName === 'business') { try { renderBusinessUI(); } catch(e) {} }
   if (viewName === 'profile') updateStreakUI();
 }
 
@@ -1123,8 +1172,8 @@ function getFilteredTx() {
 
 function renderHome() {
   updateStreak();
-  const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const totalIncome = state.transactions.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount||0), 0);
+  const totalExpense = state.transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount||0), 0);
   const balance = totalIncome - totalExpense;
   animateValue(document.getElementById('mainBalance'), 0, balance, 1000);
   document.getElementById('balanceSub').textContent = `Доходы: ${fmt(totalIncome)} · Расходы: ${fmt(totalExpense)}`;
@@ -1175,7 +1224,7 @@ function renderTransactions() {
   const pad = state.compact ? '12px' : '16px';
   list.innerHTML = filtered.map((t, i) => {
     const c = getCat(t.category);
-    const sign = t.type === 'income' ? '+' : '−';
+    const sign = t.type === 'income' ? '+' : (t.type === 'transfer' ? '↔' : '−');
     const dateStr = new Date(t.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
     const note = t.note ? ` · ${t.note}` : '';
     return `<div class="item-card" style="padding:${pad};animation-delay:${Math.min(i * .04, .5)}s" onclick="toggleSwipe(this)">
@@ -2189,34 +2238,309 @@ function computeForecast() {
   }
   return { avgDaily, projected, totalExp, dayNum, daysInMonth, zeroDay, top, tip, breakdown, budget };
 }
+
+/* —— Analytics depth —— */
+function categoryPeriodCompare() {
+  var cur = getMonthRange(0), prev = getMonthRange(-1);
+  var a = categoryBreakdown(txsInRange(cur.start, cur.end, 'expense'));
+  var bMap = {};
+  categoryBreakdown(txsInRange(prev.start, prev.end, 'expense')).forEach(function(c){ bMap[c.id]=c.amount; });
+  return a.map(function(c){
+    var prevA = bMap[c.id]||0;
+    var delta = prevA > 0 ? ((c.amount - prevA) / prevA * 100) : (c.amount>0?100:0);
+    return Object.assign({}, c, { prev: prevA, deltaPct: Math.round(delta*10)/10 });
+  });
+}
+function balanceSeries(days) {
+  days = days || 30;
+  var from = Date.now() - days * 86400000;
+  var list = (state.transactions||[]).filter(function(t){ return t.type !== 'transfer' && new Date(t.date).getTime() >= from; })
+    .slice().sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+  // starting balance before window
+  var startBal = 0;
+  (state.transactions||[]).forEach(function(t){
+    if (t.type === 'transfer') return;
+    if (new Date(t.date).getTime() < from) {
+      startBal += t.type==='income' ? Number(t.amount||0) : -Number(t.amount||0);
+    }
+  });
+  var points = [];
+  var bal = startBal;
+  var dayMap = {};
+  list.forEach(function(t){
+    var k = new Date(t.date).toDateString();
+    if (!dayMap[k]) dayMap[k] = 0;
+    dayMap[k] += t.type==='income' ? Number(t.amount||0) : -Number(t.amount||0);
+  });
+  for (var i=days-1;i>=0;i--) {
+    var d = new Date(Date.now() - i*86400000);
+    var k = d.toDateString();
+    bal += dayMap[k]||0;
+    points.push({ label: d.getDate()+'.'+(d.getMonth()+1), bal: bal });
+  }
+  return points;
+}
+function top5Expenses() {
+  return (state.transactions||[]).filter(function(t){
+    if (t.type !== 'expense') return false;
+    var d = new Date(t.date), now = new Date();
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).slice().sort(function(a,b){ return b.amount-a.amount; }).slice(0,5);
+}
+function buildInsights() {
+  var tips = [];
+  var month = (state.transactions||[]).filter(function(t){
+    var d=new Date(t.date),n=new Date();
+    return t.type==='expense' && d.getMonth()===n.getMonth() && d.getFullYear()===n.getFullYear();
+  });
+  var coffee = month.filter(function(t){ return /кофе|coffee|starbucks|кофейня/i.test(t.note||'') || t.category==='food'; });
+  // heuristic: food category large
+  var byCat = categoryBreakdown(month);
+  if (byCat[0] && byCat[0].amount > 0) {
+    var save = byCat[0].amount * 0.15;
+    tips.push('На «'+byCat[0].name+'» уходит '+fmt(byCat[0].amount)+' ('+byCat[0].pct+'%). Сократите на 15% — экономия ~'+fmt(save)+' в месяц (~'+fmt(save*12)+' в год).');
+  }
+  var coffeeSum = coffee.reduce(function(s,t){ return s+Number(t.amount||0); },0);
+  if (coffeeSum >= 1000) {
+    tips.push('Похоже на кофе/еду вне дома: ~'+fmt(coffeeSum)+' в месяц. На 2 раза в неделю меньше — порядка '+fmt(coffeeSum*0.3*12)+' ₽ в год.');
+  }
+  var f = computeForecast();
+  if (f.tip) tips.push(f.tip);
+  if (!tips.length) tips.push('Добавьте больше операций — инсайты станут точнее.');
+  return tips.slice(0,4);
+}
+
 function renderDeepAnalytics() {
-  const box = document.getElementById('deepAnalytics');
+  var box = document.getElementById('deepAnalytics');
   if (!box) return;
   if (!isProActive()) {
-    box.innerHTML = '<div class="stat-mini"><div class="sm-label">Pro</div><div class="sm-value" style="font-size:15px;font-weight:600;">Подробная аналитика доступна в Pro</div><button type="button" class="btn-primary" style="margin-top:12px;" onclick="openProPaywall()">Открыть Pro · 199 ₽</button></div>';
+    box.innerHTML = '<div class="stat-mini"><div class="sm-label">Pro</div><div class="sm-value" style="font-size:15px;font-weight:600;">Подробная аналитика доступна в Pro</div><button type="button" class="btn-primary" style="margin-top:12px;" onclick="openProPaywall()">Открыть Pro</button></div>';
     return;
   }
-  const f = computeForecast();
-  const { start, end } = getMonthRange(0);
-  const prev = getMonthRange(-1);
-  const curDays = dailySeries(start, end, 'expense');
-  const prevExp = txsInRange(prev.start, prev.end, 'expense').reduce((s,t)=>s+Number(t.amount||0),0);
-  const curExp = f.totalExp;
-  const diff = curExp - prevExp;
-  const pie = f.breakdown.slice(0, 6).map(c =>
-    '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg-light);"><span style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+c.color+'"></span>'+c.name+'</span><span style="font-weight:700;">'+c.pct+'% · '+fmt(c.amount)+'</span></div>'
-  ).join('') || '<div class="sm-label">Нет расходов</div>';
-  const maxD = Math.max(1, ...curDays.map(d=>d.total));
-  const bars = curDays.map(d => {
-    const h = Math.round(d.total / maxD * 64);
-    return '<div title="'+d.label+': '+d.total+'" style="flex:1;min-width:4px;background:var(--blue);opacity:'+(d.total?'.9':'.15')+';height:'+(d.total?Math.max(4,h):4)+'px;border-radius:3px 3px 0 0;"></div>';
+  var f = computeForecast();
+  var cmp = categoryPeriodCompare();
+  var pie = cmp.slice(0,6).map(function(c){
+    var sign = c.deltaPct>0?'+':'';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg-light);gap:8px;"><span style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:50%;background:'+c.color+'"></span>'+c.name+'</span><span style="font-weight:700;text-align:right;font-size:12px;">'+c.pct+'% · '+fmt(c.amount)+'<br><span style="color:'+(c.deltaPct>0?'var(--red)':'var(--green)')+';font-weight:600;">'+sign+c.deltaPct+'% к пр. мес.</span></span></div>';
+  }).join('') || '<div class="sm-label">Нет расходов</div>';
+  var series = balanceSeries(30);
+  var minB = Math.min.apply(null, series.map(function(p){return p.bal;}));
+  var maxB = Math.max.apply(null, series.map(function(p){return p.bal;}));
+  var span = Math.max(1, maxB - minB);
+  var lineBars = series.map(function(p){
+    var h = Math.round(((p.bal - minB) / span) * 56) + 4;
+    return '<div title="'+p.label+': '+Math.round(p.bal)+'" style="flex:1;min-width:2px;background:var(--blue);opacity:.85;height:'+h+'px;border-radius:2px 2px 0 0;"></div>';
+  }).join('');
+  var top5 = top5Expenses().map(function(t,i){
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg-light);font-size:13px;"><span>'+(i+1)+'. '+(getCat(t.category).name)+(t.note?(' · '+t.note):'')+'</span><b>'+fmt(t.amount)+'</b></div>';
+  }).join('') || '<div class="sm-label">Нет крупных трат</div>';
+  var insights = buildInsights().map(function(t){ return '<div style="padding:10px 0;border-bottom:1px solid var(--bg-light);font-size:13px;line-height:1.4;">'+t+'</div>'; }).join('');
+  var { start, end } = getMonthRange(0);
+  var curDays = dailySeries(start, end, 'expense');
+  var maxD = Math.max(1, ...curDays.map(function(d){return d.total;}));
+  var bars = curDays.map(function(d){
+    var h = Math.round(d.total / maxD * 64);
+    return '<div style="flex:1;min-width:3px;background:var(--orange);opacity:'+(d.total?'.9':'.15')+';height:'+(d.total?Math.max(4,h):4)+'px;border-radius:3px 3px 0 0;"></div>';
   }).join('');
   box.innerHTML =
-    '<div class="stat-mini"><div class="sm-label">Прогноз</div><div style="font-size:14px;line-height:1.45;font-weight:600;">'+f.tip+'</div>'+
+    '<div class="stat-mini"><div class="sm-label">Прогноз и темп</div><div style="font-size:14px;line-height:1.45;font-weight:600;">'+f.tip+'</div>'+
     '<div style="margin-top:10px;font-size:13px;color:var(--text-muted);">Средний день: <b>'+fmt(f.avgDaily)+'</b> · Прогноз месяца: <b>'+fmt(f.projected)+'</b></div></div>'+
-    '<div class="stat-mini"><div class="sm-label">Расходы по категориям (месяц)</div>'+pie+'</div>'+
-    '<div class="stat-mini"><div class="sm-label">Динамика по дням</div><div style="display:flex;align-items:flex-end;gap:2px;height:72px;margin-top:8px;">'+bars+'</div>'+
-    '<div style="margin-top:10px;font-size:13px;">Этот месяц: <b>'+fmt(curExp)+'</b> · Прошлый: <b>'+fmt(prevExp)+'</b> · Δ '+(diff>=0?'+':'')+fmt(diff)+'</div></div>';
+    '<div class="stat-mini"><div class="sm-label">Категории · этот vs прошлый месяц</div>'+pie+'</div>'+
+    '<div class="stat-mini"><div class="sm-label">Динамика баланса · 30 дней</div><div style="display:flex;align-items:flex-end;gap:1px;height:64px;margin-top:8px;">'+lineBars+'</div></div>'+
+    '<div class="stat-mini"><div class="sm-label">Расходы по дням месяца</div><div style="display:flex;align-items:flex-end;gap:2px;height:72px;margin-top:8px;">'+bars+'</div></div>'+
+    '<div class="stat-mini"><div class="sm-label">Топ-5 трат месяца</div>'+top5+'</div>'+
+    '<div class="stat-mini"><div class="sm-label">Инсайты</div>'+insights+'</div>';
+}
+
+
+
+/* —— Multi wallets + transfers —— */
+var WALLET_KINDS = [
+  { id: 'cash', name: 'Наличные' },
+  { id: 'card', name: 'Банковская карта' },
+  { id: 'crypto', name: 'Крипта' },
+  { id: 'business', name: 'Бизнес-счёт' },
+  { id: 'other', name: 'Другое' }
+];
+function walletById(id) {
+  return (state.wallets || []).find(function(w){ return w.id === id; });
+}
+function walletBalanceOf(id) {
+  var inc = 0, exp = 0;
+  (state.transactions || []).forEach(function(t) {
+    if ((t.wallet || 'main') !== id) return;
+    if (t.type === 'transfer') return;
+    if (t.type === 'income') inc += Number(t.amount||0);
+    else if (t.type === 'expense') exp += Number(t.amount||0);
+  });
+  // transfers in/out
+  (state.transactions || []).forEach(function(t) {
+    if (t.type !== 'transfer') return;
+    if (t.walletTo === id) inc += Number(t.amount||0);
+    if (t.wallet === id) exp += Number(t.amount||0);
+  });
+  return inc - exp;
+}
+function addWallet() {
+  if (!isProActive() && (state.wallets || []).length >= 2) {
+    requirePro('Больше 2 счетов');
+    return;
+  }
+  nativePrompt('Название счёта', '', { placeholder: 'Напр. Тинькофф' }).then(function(name) {
+    if (!name || !String(name).trim()) return;
+    showNativeDialog({
+      title: 'Тип счёта',
+      desc: 'Введите: cash / card / crypto / business',
+      showInput: true, value: 'card', placeholder: 'card', okText: 'Создать'
+    }).then(function(kind) {
+      kind = (kind || 'other').toLowerCase();
+      if (!['cash','card','crypto','business','other'].includes(kind)) kind = 'other';
+      var id = 'w' + Date.now();
+      state.wallets.push({ id: id, name: String(name).trim(), kind: kind });
+      saveState();
+      try { renderWalletsUI(); } catch(e) {}
+      toast('Счёт создан');
+      haptic('success');
+    });
+  });
+}
+function transferBetweenWallets() {
+  if ((state.wallets || []).length < 2) { toast('Нужно минимум 2 счёта'); return; }
+  var names = state.wallets.map(function(w,i){ return (i+1)+') '+w.name; }).join('\n');
+  showNativeDialog({
+    title: 'Перевод: откуда',
+    desc: names + '\n\nВведите номер счёта-источника',
+    showInput: true, value: '1', inputMode: 'numeric', okText: 'Далее'
+  }).then(function(fromIdx) {
+    if (fromIdx == null) return;
+    var fi = parseInt(fromIdx,10)-1;
+    if (!state.wallets[fi]) { toast('Неверный счёт'); return; }
+    showNativeDialog({
+      title: 'Перевод: куда',
+      desc: names + '\n\nВведите номер счёта-получателя',
+      showInput: true, value: '2', inputMode: 'numeric', okText: 'Далее'
+    }).then(function(toIdx) {
+      if (toIdx == null) return;
+      var ti = parseInt(toIdx,10)-1;
+      if (!state.wallets[ti] || ti === fi) { toast('Выберите другой счёт'); return; }
+      nativePrompt('Сумма перевода', '', { inputMode: 'decimal', placeholder: 'Сумма' }).then(function(val) {
+        if (val == null || val === '') return;
+        var num = parseFloat(String(val).replace(/\s/g,'').replace(',','.'));
+        if (!num || num <= 0) { toast('Некорректная сумма'); return; }
+        state.transactions.push({
+          id: Date.now().toString(),
+          type: 'transfer',
+          amount: num,
+          category: 'transfer',
+          note: 'Перевод: ' + state.wallets[fi].name + ' → ' + state.wallets[ti].name,
+          date: new Date().toISOString(),
+          wallet: state.wallets[fi].id,
+          walletTo: state.wallets[ti].id
+        });
+        saveState(); renderHome();
+        toast('Переведено ' + fmt(num));
+        haptic('success');
+      });
+    });
+  });
+}
+function renderWalletsUI() {
+  var el = document.getElementById('walletsList');
+  if (!el) return;
+  el.innerHTML = (state.wallets||[]).map(function(w){
+    return '<div class="settings-row" style="margin-bottom:8px;"><span style="font-weight:600;font-size:14px;">'+w.name+' <span style="color:var(--text-muted);font-weight:500;font-size:12px;">'+(w.kind||'')+'</span></span><span style="font-weight:700;">'+fmt(walletBalanceOf(w.id))+'</span></div>';
+  }).join('') +
+  '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">'+
+  '<button type="button" class="btn-primary" style="flex:1;padding:12px;font-size:14px;" onclick="addWallet()">+ Счёт</button>'+
+  '<button type="button" style="flex:1;padding:12px;border:none;border-radius:var(--radius-md);background:var(--bg-light);font-weight:600;font-size:14px;cursor:pointer;" onclick="transferBetweenWallets()">Перевод</button></div>';
+}
+
+
+/* —— Business tools (Pro) —— */
+function addBusinessTx(type) {
+  if (!requirePro('Бизнес-учёт')) return;
+  var title = type === 'income' ? 'Бизнес-доход' : 'Бизнес-расход';
+  nativePrompt(title + ' — сумма', '', { inputMode: 'decimal', placeholder: 'Сумма' }).then(function(val) {
+    if (val == null || val === '') return;
+    var num = parseFloat(String(val).replace(/\s/g,'').replace(',','.'));
+    if (!num || num <= 0) { toast('Некорректная сумма'); return; }
+    var cats = type === 'income' ? 'продажа / услуга / прочее' : 'закупка / реклама / налоги / прочее';
+    nativePrompt('Категория', type === 'income' ? 'продажа' : 'закупка', { placeholder: cats }).then(function(cat) {
+      if (cat == null) return;
+      state.businessTx.push({
+        id: 'b' + Date.now(), type: type, amount: num,
+        category: String(cat||'прочее').trim(), date: new Date().toISOString()
+      });
+      saveState(); renderBusinessUI(); toast('Записано'); haptic('success');
+    });
+  });
+}
+function businessPnL() {
+  var list = state.businessTx || [];
+  var inc = list.filter(function(t){ return t.type==='income'; }).reduce(function(s,t){ return s+Number(t.amount||0); },0);
+  var exp = list.filter(function(t){ return t.type==='expense'; }).reduce(function(s,t){ return s+Number(t.amount||0); },0);
+  return { income: inc, expense: exp, profit: inc - exp };
+}
+function calcROI() {
+  if (!requirePro('Калькулятор ROI')) return;
+  nativePrompt('Себестоимость', '', { inputMode: 'decimal', placeholder: 'Себестоимость' }).then(function(cost) {
+    if (cost == null || cost === '') return;
+    var c = parseFloat(String(cost).replace(/\s/g,'').replace(',','.'));
+    nativePrompt('Цена продажи', '', { inputMode: 'decimal', placeholder: 'Цена продажи' }).then(function(price) {
+      if (price == null || price === '') return;
+      var p = parseFloat(String(price).replace(/\s/g,'').replace(',','.'));
+      if (!c || c <= 0 || !p) { toast('Некорректные числа'); return; }
+      var profit = p - c;
+      var margin = (profit / p) * 100;
+      var markup = (profit / c) * 100;
+      var roi = (profit / c) * 100;
+      showNativeDialog({
+        title: 'Маржа и ROI',
+        desc: 'Прибыль с единицы: ' + fmt(profit) + '\nМаржа: ' + (Math.round(margin*10)/10) + '%\nНаценка: ' + (Math.round(markup*10)/10) + '%\nROI: ' + (Math.round(roi*10)/10) + '%',
+        showInput: false, okText: 'Ок'
+      });
+    });
+  });
+}
+function taxHelper() {
+  if (!requirePro('Налоговый помощник')) return;
+  nativePrompt('Сумма дохода', '', { inputMode: 'decimal', placeholder: 'Доход за период' }).then(function(val) {
+    if (val == null || val === '') return;
+    var inc = parseFloat(String(val).replace(/\s/g,'').replace(',','.'));
+    if (!inc || inc <= 0) { toast('Некорректная сумма'); return; }
+    var usn6 = inc * 0.06;
+    var npd4 = inc * 0.04;
+    var npd6 = inc * 0.06;
+    showNativeDialog({
+      title: 'Налоговый помощник',
+      desc: 'От дохода ' + fmt(inc) + ':\n\nУСН 6%: отложить ' + fmt(usn6) + '\nНПД 4% (физлица): ' + fmt(npd4) + '\nНПД 6% (юрлица): ' + fmt(npd6) + '\n\nЭто ориентир, не налоговая консультация.',
+      showInput: false, okText: 'Ок'
+    });
+  });
+}
+function renderBusinessUI() {
+  var el = document.getElementById('businessPanel');
+  if (!el) return;
+  if (!isProActive()) {
+    el.innerHTML = '<div class="stat-mini"><div class="sm-label">Только Pro</div><div class="sm-value" style="font-size:15px;">Бизнес-учёт, P&L, ROI и налоги</div><button type="button" class="btn-primary" style="margin-top:12px;" onclick="openProPaywall()">Открыть Pro</button></div>';
+    return;
+  }
+  var p = businessPnL();
+  var recent = (state.businessTx||[]).slice().reverse().slice(0,8).map(function(t){
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg-light);font-size:13px;"><span>'+(t.type==='income'?'+':'-')+' '+t.category+'</span><b>'+fmt(t.amount)+'</b></div>';
+  }).join('') || '<div class="sm-label">Пока нет записей</div>';
+  el.innerHTML =
+    '<div class="stat-mini"><div class="sm-label">P&L бизнеса</div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:8px;"><span>Доходы</span><b style="color:var(--green)">'+fmt(p.income)+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:6px;"><span>Расходы</span><b style="color:var(--red)">'+fmt(p.expense)+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:10px;font-size:16px;"><span>Чистая прибыль</span><b>'+fmt(p.profit)+'</b></div></div>'+
+    '<div style="display:flex;gap:8px;margin-bottom:12px;">'+
+    '<button type="button" class="btn-primary" style="flex:1;padding:12px;font-size:13px;" onclick="addBusinessTx(\'income\')">+ Доход</button>'+
+    '<button type="button" style="flex:1;padding:12px;border:none;border-radius:var(--radius-md);background:var(--bg-light);font-weight:600;font-size:13px;" onclick="addBusinessTx(\'expense\')">+ Расход</button></div>'+
+    '<div class="tools-grid">'+
+    '<button type="button" class="tool-btn" onclick="calcROI()"><div class="t-title">ROI / Маржа</div><div class="t-desc">Себестоимость и цена</div></button>'+
+    '<button type="button" class="tool-btn" onclick="taxHelper()"><div class="t-title">Налоги</div><div class="t-desc">УСН 6% · НПД 4/6%</div></button></div>'+
+    '<div class="stat-mini"><div class="sm-label">Последние операции</div>'+recent+'</div>';
 }
 
 /* Boot */
@@ -2232,6 +2556,7 @@ function bootApp() {
   try { renderHome(); } catch (e) { console.warn('home', e); }
   try { refreshSmartStats(); } catch (e) {}
   try { updateProUI(); } catch (e) {}
+  try { renderWalletsUI(); } catch (e) {}
   try {
     if (document.getElementById('sliderNeeds')) updateSliders('needs');
   } catch (e) { console.warn('calc', e); }
