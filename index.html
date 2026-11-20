@@ -19,7 +19,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ===== Lunetra Split-Tone Fintech (ZEN-inspired) ===== */
+/* ===== Lunetra · Liquid Glass
 :root, [data-theme="light"] {
   --zone-top-bg: #F8F9FA;
   --zone-sheet-bg: #1A1A1A;
@@ -640,6 +640,284 @@ canvas { max-width: 100%; }
   .zone-top, .zone-sheet, .content-area { max-width: 420px; margin-left: auto; margin-right: auto; }
   .zone-sheet { max-width: 420px; }
 }
+
+/* ========== LIQUID GLASS SYSTEM (2026) ========== */
+:root, [data-theme="light"] {
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-bg-strong: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-highlight: rgba(255, 255, 255, 0.35);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.18);
+  --glass-blur: blur(20px) saturate(1.6);
+  --liquid-shine: linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.04) 40%, transparent 60%);
+  --accent-indigo: #4F46E5;
+  --accent-indigo-soft: #E0E7FF;
+  --green: #4ADE80;
+  --red: #F87171;
+}
+
+[data-theme="dark"] {
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-strong: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12);
+  --glass-blur: blur(24px) saturate(1.5);
+}
+
+/* Liquid refraction shimmer */
+@keyframes liquidShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes liquidFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes liquidPulse {
+  0%, 100% { box-shadow: var(--glass-shadow), 0 0 0 0 rgba(79,70,229,0.0); }
+  50% { box-shadow: var(--glass-shadow), 0 0 24px 2px rgba(79,70,229,0.18); }
+}
+@keyframes glassIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); filter: blur(8px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes blobMove {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(12px,-8px) scale(1.05); }
+  66% { transform: translate(-10px,6px) scale(0.95); }
+}
+
+.liquid-glass {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--liquid-shine);
+  background-size: 200% 200%;
+  animation: liquidShimmer 8s ease infinite;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.7;
+}
+.liquid-glass::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+  pointer-events: none;
+}
+
+/* Ambient blobs behind glass */
+.zone-sheet {
+  background: linear-gradient(180deg, #1A1A1A 0%, #0A0A0A 100%) !important;
+  position: relative;
+  isolation: isolate;
+}
+.zone-sheet::before,
+.zone-sheet::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+  animation: blobMove 12s ease-in-out infinite;
+}
+.zone-sheet::before {
+  width: 180px; height: 180px;
+  background: #4F46E5;
+  top: 10%; left: -40px;
+}
+.zone-sheet::after {
+  width: 160px; height: 160px;
+  background: #22C55E;
+  bottom: 20%; right: -30px;
+  animation-delay: -4s;
+}
+.zone-sheet > * { position: relative; z-index: 1; }
+
+/* Glass action pills */
+.action-pill-dark, .btn, .action-buttons .btn {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  color: #fff !important;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), background 0.2s, box-shadow 0.3s !important;
+}
+.action-pill-dark:active, .btn:active {
+  transform: scale(0.94) !important;
+  background: rgba(255,255,255,0.16) !important;
+}
+.action-pill-dark:hover, .btn:hover {
+  box-shadow: var(--glass-shadow), 0 0 20px rgba(79,70,229,0.2) !important;
+}
+
+/* Transaction glass cards */
+.item-card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(16px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+  margin-bottom: 10px !important;
+  padding: 12px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  animation: glassIn 0.5s cubic-bezier(0.22,1,0.36,1) both !important;
+}
+.item-card:nth-child(1) { animation-delay: 0.05s !important; }
+.item-card:nth-child(2) { animation-delay: 0.1s !important; }
+.item-card:nth-child(3) { animation-delay: 0.15s !important; }
+.item-card:nth-child(4) { animation-delay: 0.2s !important; }
+.item-card:nth-child(5) { animation-delay: 0.25s !important; }
+
+.item-icon {
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.item-amount.income, .transaction-amount.positive { color: var(--green) !important; }
+.item-amount.expense { color: #fff !important; }
+
+/* Account cards - soft glass on light */
+.account-card {
+  background: rgba(255,255,255,0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(0,0,0,0.05) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s !important;
+}
+.account-card:active { transform: scale(0.96) !important; }
+.account-card.active {
+  outline: 2px solid var(--accent-indigo) !important;
+  box-shadow: 0 8px 28px rgba(79,70,229,0.2) !important;
+}
+
+.wallet-pill, .account-selector {
+  background: var(--accent-indigo-soft) !important;
+  color: var(--accent-indigo) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(79,70,229,0.15) !important;
+}
+
+/* Glass nav */
+.floating-nav, .bottom-nav {
+  background: rgba(20, 20, 20, 0.72) !important;
+  backdrop-filter: blur(24px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.5) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+
+/* Glass secondary panels */
+.stat-mini, .goal-card, .settings-row, .tool-btn, .chart-card, .donut-card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+
+.chip.active {
+  background: #fff !important;
+  color: #0A0A0A !important;
+  box-shadow: 0 4px 16px rgba(255,255,255,0.15) !important;
+}
+
+/* Chat glass bubbles */
+.msg-bot {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1) !important;
+}
+.msg-user {
+  background: linear-gradient(135deg, #E0E7FF, #C7D2FE) !important;
+  color: #1E1B4B !important;
+  border: 1px solid rgba(79,70,229,0.2) !important;
+  box-shadow: 0 8px 24px rgba(79,70,229,0.2) !important;
+}
+[data-theme="dark"] .msg-user {
+  background: linear-gradient(135deg, #4F46E5, #6366F1) !important;
+  color: #fff !important;
+}
+.msg-quick button {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(12px) !important;
+  color: #fff !important;
+  border-radius: 50px !important;
+}
+
+/* FAB liquid */
+.fab-assistant {
+  background: linear-gradient(145deg, #4F46E5, #7C3AED) !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  box-shadow: 0 8px 32px rgba(79,70,229,0.45), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+  animation: liquidPulse 3s ease-in-out infinite, liquidFloat 4s ease-in-out infinite !important;
+}
+
+/* Splash liquid */
+.splash {
+  background: radial-gradient(ellipse at 50% 40%, #1e1b4b 0%, #0A0A0A 60%) !important;
+}
+.splash-logo {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.2), 0 0 60px rgba(79,70,229,0.5), 0 0 100px rgba(124,58,237,0.25) !important;
+  animation: splashIn 1s cubic-bezier(0.34,1.56,0.64,1) both, liquidPulse 3s 1s ease-in-out infinite !important;
+}
+
+/* Sheet entrance */
+.zone-sheet {
+  animation: sheetUp 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) both !important;
+}
+@keyframes sheetUp {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.zone-top, .top-card, .top-section {
+  animation: fadeInTop 0.8s ease-out both !important;
+}
+@keyframes fadeInTop {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Bottom sheet modals glass */
+.bottom-sheet, .native-dialog {
+  background: rgba(26,26,26,0.92) !important;
+  backdrop-filter: blur(24px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 -20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+}
+
+/* Material icon size helper */
+.material-symbols-rounded { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+/* Chart line animation if present */
+.chart-line {
+  fill: none; stroke: var(--green); stroke-width: 3; stroke-linecap: round;
+  stroke-dasharray: 1000; stroke-dashoffset: 1000;
+  animation: drawLine 2s ease-out forwards;
+}
+.chart-fill { opacity: 0; animation: fadeIn 1.5s 0.4s forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 </style>
 
 </head>
@@ -697,7 +975,7 @@ canvas { max-width: 100%; }
 
 <div class="content-area">
   <main class="view active" id="view-home">
-  <div class="zone-sheet">
+  <div class="zone-sheet liquid-surface">
     <div class="action-pills">
       <button type="button" class="action-pill-dark" onclick="openAddModal('expense')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div> Расход</button>
       <button type="button" class="action-pill-dark" onclick="openAddModal('income')"><div class="icon"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div> Доход</button>
@@ -937,7 +1215,7 @@ canvas { max-width: 100%; }
     </div>
 
     <div style="text-align:center;margin-top:28px;font-size:12px;color:var(--text-muted);">
-      Lunetra · Split-Tone Fintech<br>Данные только на вашем устройстве
+      Lunetra · Liquid Glass<br>Данные только на вашем устройстве
     </div>
   </main>
 </div>
